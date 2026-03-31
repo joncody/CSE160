@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Assignment 0: Vector Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #4fc3f7;
+        }
+        .main-container {
+            display: flex;
+            gap: 30px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            align-items: flex-start;
+        }
+        canvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+            background-color: #000;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 340px;
+        }
+        .control-group {
+            background-color: #383838;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4fc3f7;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            color: #4fc3f7;
+        }
+        /* Fixed Input Row Layout */
+        .vector-input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .label-box {
+            width: 100px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .coord-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .input-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        label {
+            font-size: 0.85rem;
+            color: #bbb;
+        }
+        input[type="number"], select {
+            background-color: #444;
+            border: 1px solid #555;
+            color: white;
+            padding: 6px;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="number"] {
+            width: 55px;
+        }
+        select {
+            width: 140px;
+        }
+        /* FIX: Ensure focused input is always on top so borders aren't hidden */
+        input:focus, select:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        input[type="button"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #0288d1;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 5px;
+        }
+        input[type="button"]:hover {
+            background-color: #03a9f4;
+        }
+        .v1-label {
+            color: #ff5252;
+        }
+        .v2-label {
+            color: #448aff;
+        }
+        .op-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .op-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body onload="main()">
+    <h1>Vector Operations Lab</h1>
+    <div class="main-container">
+        <canvas id="cnv1" width="400" height="400"></canvas>
+        <div class="controls">
+            <!-- Define Vectors Group -->
+            <div class="control-group">
+                <h3>Define Vectors</h3>
+                <!-- Vector 1 Row -->
+                <div class="vector-input-row">
+                    <div class="label-box v1-label">Vector 1 (v1)</div>
+                    <div class="coord-inputs">
+                        <div class="input-item">
+                            <label>x:</label>
+                            <input type="number" id="v1x-id" value="0" step="0.1">
+                        </div>
+                        <div class="input-item">
+                            <label>y:</label>
+                            <input type="number" id="v1y-id" value="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                <!-- Vector 2 Row -->
+                <div class="vector-input-row">
+                    <div class="label-box v2-label">Vector 2 (v2)</div>
+                    <div class="coord-inputs">
+                        <div class="input-item">
+                            <label>x:</label>
+                            <input type="number" id="v2x-id" value="0" step="0.1">
+                        </div>
+                        <div class="input-item">
+                            <label>y:</label>
+                            <input type="number" id="v2y-id" value="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                <input type="button" value="Draw Vectors" onclick="handleDrawEvent()">
+            </div>
+            <!-- Operations Group -->
+            <div class="control-group" style="border-left-color: #66bb6a;">
+                <h3>Vector Operations</h3>
+                <div class="op-row">
+                    <div class="op-item">
+                        <label>Action:</label>
+                        <select id="operation-id">
+                            <option value="add">Add (v1 + v2)</option>
+                            <option value="sub">Subtract (v1 - v2)</option>
+                            <option value="mul">Multiply</option>
+                            <option value="div">Divide</option>
+                            <option value="mag">Magnitude</option>
+                            <option value="normal">Normalize</option>
+                            <option value="between">Angle Between</option>
+                            <option value="area">Area of Triangle</option>
+                        </select>
+                    </div>
+                    <div class="op-item">
+                        <label>Scalar (s):</label>
+                        <input type="number" id="scalar-id" value="1" step="0.1">
+                    </div>
+                </div>
+                <input type="button" value="Execute & Draw" onclick="handleDrawOperationEvent()" style="background-color: #388e3c;">
+            </div>
+            <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 0;">
+                Results are printed to the browser console (F12).
+            </p>
+        </div>
+    </div>
+    <script src="lib/cuon-matrix-cse160.js"></script>
+    <script src="asgn0.js"></script>
+</body>
+</html>
