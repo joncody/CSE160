@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="author" content="Jon Cody">
+    <title>Assignment 0: Vector Visualizer</title>
     <link rel="stylesheet" href="asgn0.css">
-    <title>Assignment 0: Vector Library</title>
 </head>
 <body onload="main()">
     <h1>Vector Operations Lab</h1>
@@ -39,7 +39,7 @@
                         </div>
                     </div>
                 </div>
-                <input type="button" value="Draw Vectors" onclick="handleDrawEvent()">
+                <button type="button" onclick="handleDrawEvent()">Draw Vectors</button>
             </div>
             <div class="control-group" style="border-left-color: #66bb6a;">
                 <h3>Vector Operations</h3>
@@ -62,9 +62,9 @@
                         <input type="number" id="scalar-id" value="1" step="0.1">
                     </div>
                 </div>
-                <input type="button" value="Execute & Draw" onclick="handleDrawOperationEvent()" style="background-color: #388e3c;">
+                <button type="button" class="btn-execute" onclick="handleDrawOperationEvent()">Execute & Draw</button>
             </div>
-            <div class="control-group" style="border-left-color: #ffb74d; font-size: 0.8rem; line-height: 1.4;">
+            <div class="control-group info-card">
                 <strong>Jon Cody</strong><br>
                 jdcody@ucsc.edu<br>
                 <strong>Notes to Grader:</strong> All vector operations implemented. Numerical output for Mag, Angle, and Area is visible in the console (F12).

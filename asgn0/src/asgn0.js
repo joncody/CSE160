@@ -8,7 +8,6 @@ function main() {
         return;
     }
     ctx = canvas.getContext("2d");
-    // Initial black background
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
