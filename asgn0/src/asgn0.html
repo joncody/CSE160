@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Jon Cody">
+    <link rel="stylesheet" href="asgn0.css">
+    <title>Assignment 0: Vector Library</title>
+</head>
+<body onload="main()">
+    <h1>Vector Operations Lab</h1>
+    <div class="main-container">
+        <canvas id="cnv1" width="400" height="400"></canvas>
+        <div class="controls">
+            <div class="control-group">
+                <h3>Define Vectors</h3>
+                <div class="vector-input-row">
+                    <div class="label-box v1-label">Vector 1 (v1)</div>
+                    <div class="coord-inputs">
+                        <div class="input-item">
+                            <label>x:</label>
+                            <input type="number" id="v1x-id" value="0" step="0.1">
+                        </div>
+                        <div class="input-item">
+                            <label>y:</label>
+                            <input type="number" id="v1y-id" value="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                <div class="vector-input-row">
+                    <div class="label-box v2-label">Vector 2 (v2)</div>
+                    <div class="coord-inputs">
+                        <div class="input-item">
+                            <label>x:</label>
+                            <input type="number" id="v2x-id" value="0" step="0.1">
+                        </div>
+                        <div class="input-item">
+                            <label>y:</label>
+                            <input type="number" id="v2y-id" value="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                <input type="button" value="Draw Vectors" onclick="handleDrawEvent()">
+            </div>
+            <div class="control-group" style="border-left-color: #66bb6a;">
+                <h3>Vector Operations</h3>
+                <div class="op-row">
+                    <div class="op-item">
+                        <label>Action:</label>
+                        <select id="operation-id">
+                            <option value="add">Add (v1 + v2)</option>
+                            <option value="sub">Subtract (v1 - v2)</option>
+                            <option value="mul">Multiply</option>
+                            <option value="div">Divide</option>
+                            <option value="mag">Magnitude</option>
+                            <option value="normal">Normalize</option>
+                            <option value="between">Angle Between</option>
+                            <option value="area">Area of Triangle</option>
+                        </select>
+                    </div>
+                    <div class="op-item">
+                        <label>Scalar (s):</label>
+                        <input type="number" id="scalar-id" value="1" step="0.1">
+                    </div>
+                </div>
+                <input type="button" value="Execute & Draw" onclick="handleDrawOperationEvent()" style="background-color: #388e3c;">
+            </div>
+            <div class="control-group" style="border-left-color: #ffb74d; font-size: 0.8rem; line-height: 1.4;">
+                <strong>Jon Cody</strong><br>
+                jdcody@ucsc.edu<br>
+                <strong>Notes to Grader:</strong> All vector operations implemented. Numerical output for Mag, Angle, and Area is visible in the console (F12).
+            </div>
+            <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 0;">
+                Results are printed to the browser console (F12).
+            </p>
+        </div>
+    </div>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="asgn0.js"></script>
+</body>
+</html>
