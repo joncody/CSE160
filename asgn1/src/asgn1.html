@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Jonathan Cody">
+    <title>Assignment 1: WebGL Paint</title>
+    <link rel="stylesheet" href="asgn1.css">
+</head>
+<body onload="main()">
+    <h1>WebGL Paint Program</h1>
+    <div class="main-container">
+        <!-- Canvas at the top of the card -->
+        <canvas id="webgl" width="400" height="400">
+            Please use a browser that supports "canvas"
+        </canvas>
+        <!-- UI Controls Stacked below -->
+        <div class="controls">
+            <section>
+                <div class="button-group">
+                    <button id="clearButton">Clear Canvas</button>
+                    <button id="drawPictureButton">Draw Special Picture</button>
+                </div>
+            </section>
+            <section>
+                <div class="label">Drawing Mode:</div>
+                <div class="button-group">
+                    <button id="squareButton" class="active-btn">Squares</button>
+                    <button id="triangleButton">Triangles</button>
+                    <button id="circleButton">Circles</button>
+                </div>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button id="rainbowButton" class="toggle-btn">Rainbow Mode: OFF</button>
+                </div>
+            </section>
+            <section>
+                <div class="label">Color & Alpha:</div>
+                <div class="slider-row">
+                    <span>Red (0-255)</span> 
+                    <input type="range" id="redSlider" min="0" max="255" value="255">
+                </div>
+                <div class="slider-row">
+                    <span>Green (0-255)</span> 
+                    <input type="range" id="greenSlider" min="0" max="255" value="0">
+                </div>
+                <div class="slider-row">
+                    <span>Blue (0-255)</span> 
+                    <input type="range" id="blueSlider" min="0" max="255" value="0">
+                </div>
+                <div class="slider-row">
+                    <span>Alpha (0-100)</span> 
+                    <input type="range" id="alphaSlider" min="0" max="100" value="100">
+                </div>
+            </section>
+            <section>
+                <div class="label">Shape Size:</div>
+                <input type="range" id="sizeSlider" min="5" max="100" value="20" class="full-slider">
+                <div class="label" style="margin-top: 15px;">Circle Segments (3-40):</div>
+                <input type="range" id="segmentSlider" min="3" max="40" value="10" class="full-slider">
+            </section>
+            <!-- Bottom Contact Info -->
+            <div class="info-card">
+                <strong>Jonathan Cody</strong><br>
+                jdcody@ucsc.edu<br><br>
+                <strong>Notes to Grader:</strong> Detailed picture uses 25+ triangles. Initials JDC are Red, Green, and Blue. Implemented Alpha blending and full-spectrum Rainbow Mode.
+                <hr style="border: 0; border-top: 1px solid #555; margin: 15px 0;">
+                <strong>Original Hand-Drawn Sketch:</strong><br>
+                <!-- Add the image here -->
+                <img src="drawing.jpg" id="drawing" alt="Reference Drawing">
+            </div>
+        </div>
+    </div>
+    <!-- Libraries -->
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <!-- Shape Classes -->
+    <script src="Point.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <!-- Main -->
+    <script src="asgn1.js"></script>
+</body>
+</html>

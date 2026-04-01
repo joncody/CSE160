@@ -1,0 +1,144 @@
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
+}
+h1 {
+    margin-bottom: 25px;
+    color: #4fc3f7;
+}
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background-color: #2d2d2d;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 480px;
+    box-sizing: border-box;
+}
+canvas {
+    background-color: #000;
+    border: 2px solid #333;
+    border-radius: 8px;
+    cursor: crosshair;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+section {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.label {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #4fc3f7;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+}
+.slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+    gap: 15px;
+}
+.slider-row span {
+    font-size: 0.85rem;
+    font-weight: bold;
+    min-width: 90px;
+    color: #bbb;
+}
+input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+}
+.full-slider {
+    width: 100%;
+    margin-top: 5px;
+}
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+button {
+    flex: 1;
+    min-width: 80px;
+    padding: 12px;
+    cursor: pointer;
+    background: #3a3a3a;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+button:hover {
+    background: #4a4a4a;
+    border-color: #888;
+}
+#clearButton {
+    background: #c62828;
+    border-color: #d32f2f;
+}
+#clearButton:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4);
+}
+#drawPictureButton {
+    background: #2e7d32;
+    border-color: #4caf50;
+}
+#drawPictureButton:hover {
+    background: #388e3c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+.active-btn {
+    background: #0288d1 !important;
+    border-color: #03a9f4;
+}
+.rainbow-on {
+    background: linear-gradient(to right, 
+        #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff
+    ) !important;
+    border-color: #fff !important;
+    color: white !important;
+    text-shadow: 1px 1px 2px black;
+}
+#drawing {
+    width: 400px;
+    height: 400px;
+    display: block;
+    margin: 10px auto; /* Centers the image within the card */
+    border: 1px solid #555;
+    border-radius: 4px;
+    object-fit: cover; /* Ensures the sketch fills the 400x400 area neatly */
+    background-color: #fff; /* White background for the sketch to pop */
+}
+.info-card {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ffb74d;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-top: 10px;
+}
