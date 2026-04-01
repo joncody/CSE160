@@ -71,7 +71,7 @@ function handleMouseClick(ev) {
 
 function renderAllShapes() {
     gl.clear(gl.COLOR_BUFFER_BIT);
-    for (let i = 0; i < g_shapesList.length; i++) {
+    for (let i = 0; i < g_shapesList.length; i += 1) {
         g_shapesList[i].render();
     }
 }
@@ -100,7 +100,7 @@ function drawSpecialPicture() {
     drawTriangle([0.4, -0.1, 0.7, -0.1, 0.4, -0.05]);
     // Detailed Sun (reach 25+ triangles total)
     gl.uniform4f(u_FragColor, 1.0, 0.8, 0.0, 1.0);
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 15; i += 1) {
         let a = (i / 15) * Math.PI * 2;
         drawTriangle([
             0.7, 0.7,
@@ -118,16 +118,40 @@ function addActionsForHtmlUI() {
     g_selectedColor[3] = document.getElementById('alphaSlider').value / 100;
     g_selectedSize = document.getElementById('sizeSlider').value;
     g_selectedSegments = document.getElementById('segmentSlider').value;
-    document.getElementById('redSlider').oninput = function() { g_selectedColor[0] = this.value / 255; };
-    document.getElementById('greenSlider').oninput = function() { g_selectedColor[1] = this.value / 255; };
-    document.getElementById('blueSlider').oninput = function() { g_selectedColor[2] = this.value / 255; };
-    document.getElementById('alphaSlider').oninput = function() { g_selectedColor[3] = this.value / 100; };
-    document.getElementById('sizeSlider').oninput = function() { g_selectedSize = this.value; };
-    document.getElementById('segmentSlider').oninput = function() { g_selectedSegments = this.value; };
-    document.getElementById('clearButton').onclick = function() { g_shapesList = []; renderAllShapes(); };
-    document.getElementById('squareButton').onclick = function() { g_selectedType = 'point'; updateActiveBtn(this); };
-    document.getElementById('triangleButton').onclick = function() { g_selectedType = 'triangle'; updateActiveBtn(this); };
-    document.getElementById('circleButton').onclick = function() { g_selectedType = 'circle'; updateActiveBtn(this); };
+    document.getElementById('redSlider').oninput = function () {
+        g_selectedColor[0] = this.value / 255;
+    };
+    document.getElementById('greenSlider').oninput = function () {
+        g_selectedColor[1] = this.value / 255;
+    };
+    document.getElementById('blueSlider').oninput = function () {
+        g_selectedColor[2] = this.value / 255;
+    };
+    document.getElementById('alphaSlider').oninput = function () {
+        g_selectedColor[3] = this.value / 100;
+    };
+    document.getElementById('sizeSlider').oninput = function () {
+        g_selectedSize = this.value;
+    };
+    document.getElementById('segmentSlider').oninput = function () {
+        g_selectedSegments = this.value;
+    };
+    document.getElementById('clearButton').onclick = function () {
+        g_shapesList = [];
+        renderAllShapes();
+    };
+    document.getElementById('squareButton').onclick = function () {
+        g_selectedType = 'point';
+        updateActiveBtn(this);
+    };
+    document.getElementById('triangleButton').onclick = function () {
+        g_selectedType = 'triangle';
+        updateActiveBtn(this);
+    };
+    document.getElementById('circleButton').onclick = function () {
+        g_selectedType = 'circle';
+        updateActiveBtn(this);
+    };
     document.getElementById('rainbowButton').onclick = function() {
         g_rainbowMode = !g_rainbowMode;
         this.innerText = `Rainbow Mode: ${g_rainbowMode ? "ON" : "OFF"}`;
@@ -141,7 +165,11 @@ function main() {
     connectVariablesToGLSL();
     addActionsForHtmlUI();
     canvas.onmousedown = handleMouseClick;
-    canvas.onmousemove = function(ev) { if (ev.buttons == 1) handleMouseClick(ev); };
+    canvas.onmousemove = function (ev) {
+        if (ev.buttons == 1) {
+            handleMouseClick(ev);
+        }
+    };
     gl.clearColor(0.05, 0.05, 0.05, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 }
