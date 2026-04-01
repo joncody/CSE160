@@ -142,3 +142,37 @@ button:hover {
     line-height: 1.5;
     margin-top: 10px;
 }
+/**
+ * Bottom Navigation and Divider Styling
+ */
+
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #444; /* Slightly darker to blend with background */
+    margin: 20px 0 15px 0;
+    /* Subtle blue glow to match the header theme */
+    box-shadow: 0 1px 0 rgba(79, 195, 247, 0.1);
+}
+
+.home-link-container {
+    text-align: center;
+    margin-top: 5px;
+    padding-bottom: 10px; /* Extra padding at the very bottom of the card */
+}
+
+.home-link {
+    color: #4fc3f7; /* Primary theme blue */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.home-link:hover {
+    color: #e1f5fe; /* Requested Light Blue hover state */
+    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(225, 245, 254, 0.4);
+    transform: translateY(-1px); /* Subtle lift effect */
+}
