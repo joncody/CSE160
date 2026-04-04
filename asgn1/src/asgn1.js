@@ -53,6 +53,7 @@ function handleMouseClick(ev) {
     let rect = ev.target.getBoundingClientRect();
     x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
     y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
+
     let shape;
     if (g_selectedType === 'point') {
         shape = new Point();
@@ -62,11 +63,12 @@ function handleMouseClick(ev) {
         shape = new Circle();
         shape.segments = g_selectedSegments;
     }
+
     shape.position = [x, y];
     shape.size = g_selectedSize;
     shape.color = g_rainbowMode ? [Math.random(), Math.random(), Math.random(), g_selectedColor[3]] : [...g_selectedColor];
+
     g_shapesList.push(shape);
-    renderAllShapes();
 }
 
 function renderAllShapes() {
@@ -76,82 +78,59 @@ function renderAllShapes() {
     }
 }
 
+// Render loop function
+function tick() {
+    renderAllShapes();
+    requestAnimationFrame(tick);
+}
+
 function drawSpecialPicture() {
-    g_shapesList = [];
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    g_shapesList = []; // Clear previous shapes
+
+    // Helper to add triangles to list for the persistent loop
+    const addT = (verts, color) => g_shapesList.push(new CustomTriangle(verts, color));
+
     // Scenery Background
-    gl.uniform4f(u_FragColor, 0.4, 0.3, 0.2, 1.0);
-    drawTriangle([-1.0, -0.4, 0.0, -0.4, -0.5, 0.2]);
-    drawTriangle([0.0, -0.4, 1.0, -0.4, 0.5, 0.1]);
-    gl.uniform4f(u_FragColor, 0.2, 0.2, 0.2, 1.0);
-    drawTriangle([-1.0, -1.0, 1.0, -1.0, 0.0, -0.4]);
-    // J - RED
-    gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1.0);
-    drawTriangle([-0.6, 0.4, -0.5, 0.4, -0.6, -0.1]);
-    drawTriangle([-0.6, -0.1, -0.5, -0.1, -0.7, -0.3]);
-    // D - GREEN
-    gl.uniform4f(u_FragColor, 0.0, 1.0, 0.0, 1.0);
-    drawTriangle([-0.1, 0.4, 0.0, 0.4, -0.1, -0.1]);
-    drawTriangle([0.0, 0.4, 0.2, 0.15, 0.0, -0.1]);
-    // C - BLUE
-    gl.uniform4f(u_FragColor, 0.0, 0.5, 1.0, 1.0);
-    drawTriangle([0.4, 0.4, 0.7, 0.4, 0.4, 0.35]);
-    drawTriangle([0.4, 0.4, 0.45, 0.4, 0.4, -0.1]);
-    drawTriangle([0.4, -0.1, 0.7, -0.1, 0.4, -0.05]);
-    // Detailed Sun (reach 25+ triangles total)
-    gl.uniform4f(u_FragColor, 1.0, 0.8, 0.0, 1.0);
-    for (let i = 0; i < 15; i += 1) {
-        let a = (i / 15) * Math.PI * 2;
-        drawTriangle([
-            0.7, 0.7,
-            0.7 + Math.cos(a) * 0.2, 0.7 + Math.sin(a) * 0.2,
-            0.7 + Math.cos(a + 0.1) * 0.15, 0.7 + Math.sin(a + 0.1) * 0.15
-        ]);
+    addT([-1.0, -0.4, 0.0, -0.4, -0.5, 0.2], [0.4, 0.3, 0.2, 1.0]);
+    addT([0.0, -0.4, 1.0, -0.4, 0.5, 0.1], [0.4, 0.3, 0.2, 1.0]);
+    addT([-1.0, -1.0, 1.0, -1.0, 0.0, -0.4], [0.2, 0.2, 0.2, 1.0]);
+
+    // Initials JDC
+    addT([-0.6, 0.4, -0.5, 0.4, -0.6, -0.1], [1.0, 0.0, 0.0, 1.0]); // J
+    addT([-0.6, -0.1, -0.5, -0.1, -0.7, -0.3], [1.0, 0.0, 0.0, 1.0]);
+    addT([-0.1, 0.4, 0.0, 0.4, -0.1, -0.1], [0.0, 1.0, 0.0, 1.0]); // D
+    addT([0.0, 0.4, 0.2, 0.15, 0.0, -0.1], [0.0, 1.0, 0.0, 1.0]);
+    addT([0.4, 0.4, 0.7, 0.4, 0.4, 0.35], [0.0, 0.5, 1.0, 1.0]);   // C
+    addT([0.4, 0.4, 0.45, 0.4, 0.4, -0.1], [0.0, 0.5, 1.0, 1.0]);
+    addT([0.4, -0.1, 0.7, -0.1, 0.4, -0.05], [0.0, 0.5, 1.0, 1.0]);
+
+    // Sun
+    for (let i = 0; i < 20; i++) {
+        let a1 = (i / 20) * Math.PI * 2;
+        let a2 = ((i + 1) / 20) * Math.PI * 2;
+        addT([0.7, 0.7, 0.7 + Math.cos(a1) * 0.2, 0.7 + Math.sin(a1) * 0.2, 0.7 + Math.cos(a2) * 0.2, 0.7 + Math.sin(a2) * 0.2], [1.0, 0.8, 0.0, 1.0]);
     }
 }
 
 function addActionsForHtmlUI() {
-    // Initial Sync
     g_selectedColor[0] = document.getElementById('redSlider').value / 255;
     g_selectedColor[1] = document.getElementById('greenSlider').value / 255;
     g_selectedColor[2] = document.getElementById('blueSlider').value / 255;
     g_selectedColor[3] = document.getElementById('alphaSlider').value / 100;
     g_selectedSize = document.getElementById('sizeSlider').value;
     g_selectedSegments = document.getElementById('segmentSlider').value;
-    document.getElementById('redSlider').oninput = function () {
-        g_selectedColor[0] = this.value / 255;
-    };
-    document.getElementById('greenSlider').oninput = function () {
-        g_selectedColor[1] = this.value / 255;
-    };
-    document.getElementById('blueSlider').oninput = function () {
-        g_selectedColor[2] = this.value / 255;
-    };
-    document.getElementById('alphaSlider').oninput = function () {
-        g_selectedColor[3] = this.value / 100;
-    };
-    document.getElementById('sizeSlider').oninput = function () {
-        g_selectedSize = this.value;
-    };
-    document.getElementById('segmentSlider').oninput = function () {
-        g_selectedSegments = this.value;
-    };
-    document.getElementById('clearButton').onclick = function () {
-        g_shapesList = [];
-        renderAllShapes();
-    };
-    document.getElementById('squareButton').onclick = function () {
-        g_selectedType = 'point';
-        updateActiveBtn(this);
-    };
-    document.getElementById('triangleButton').onclick = function () {
-        g_selectedType = 'triangle';
-        updateActiveBtn(this);
-    };
-    document.getElementById('circleButton').onclick = function () {
-        g_selectedType = 'circle';
-        updateActiveBtn(this);
-    };
+
+    document.getElementById('redSlider').oninput = function () { g_selectedColor[0] = this.value / 255; };
+    document.getElementById('greenSlider').oninput = function () { g_selectedColor[1] = this.value / 255; };
+    document.getElementById('blueSlider').oninput = function () { g_selectedColor[2] = this.value / 255; };
+    document.getElementById('alphaSlider').oninput = function () { g_selectedColor[3] = this.value / 100; };
+    document.getElementById('sizeSlider').oninput = function () { g_selectedSize = this.value; };
+    document.getElementById('segmentSlider').oninput = function () { g_selectedSegments = this.value; };
+
+    document.getElementById('clearButton').onclick = function () { g_shapesList = []; };
+    document.getElementById('squareButton').onclick = function () { g_selectedType = 'point'; updateActiveBtn(this); };
+    document.getElementById('triangleButton').onclick = function () { g_selectedType = 'triangle'; updateActiveBtn(this); };
+    document.getElementById('circleButton').onclick = function () { g_selectedType = 'circle'; updateActiveBtn(this); };
     document.getElementById('rainbowButton').onclick = function() {
         g_rainbowMode = !g_rainbowMode;
         this.innerText = `Rainbow Mode: ${g_rainbowMode ? "ON" : "OFF"}`;
@@ -165,11 +144,9 @@ function main() {
     connectVariablesToGLSL();
     addActionsForHtmlUI();
     canvas.onmousedown = handleMouseClick;
-    canvas.onmousemove = function (ev) {
-        if (ev.buttons == 1) {
-            handleMouseClick(ev);
-        }
-    };
+    canvas.onmousemove = function (ev) { if (ev.buttons == 1) handleMouseClick(ev); };
     gl.clearColor(0.05, 0.05, 0.05, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Start the render loop
+    requestAnimationFrame(tick);
 }
