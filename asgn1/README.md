@@ -24,7 +24,7 @@ The "Special Picture" (Requirement 12) recreates the provided hand-drawn sketch 
         ├── Point.js
         ├── Triangle.js
         ├── Circle.js
-        └── sketch.jpg (Reference Image)
+        └── drawing.jpg (Reference Image)
 
 ## How to Run:
 1. Navigate to the `src` directory.
