@@ -135,6 +135,12 @@ function addActionsForHtmlUI() {
         g_rainbowMode = !g_rainbowMode;
         this.innerText = `Rainbow Mode: ${g_rainbowMode ? "ON" : "OFF"}`;
         this.classList.toggle('rainbow-on', g_rainbowMode);
+        // Get the RGB sliders
+        const sliders = ['redSlider', 'greenSlider', 'blueSlider'];
+        // Disable or enable them based on g_rainbowMode
+        sliders.forEach(id => {
+            document.getElementById(id).disabled = g_rainbowMode;
+        });
     };
     document.getElementById('drawPictureButton').onclick = drawSpecialPicture;
 }

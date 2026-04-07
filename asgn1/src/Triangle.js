@@ -47,7 +47,9 @@ class CustomTriangle {
 
     render() {
         gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
-        if (this.buffer === null) this.buffer = gl.createBuffer();
+        if (this.buffer === null) {
+            this.buffer = gl.createBuffer();
+        }
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
         gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);

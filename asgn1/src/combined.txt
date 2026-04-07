@@ -1,0 +1,559 @@
+
+
+---------- FILE: ./asgn1.css ----------
+
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
+}
+h1 {
+    margin-bottom: 25px;
+    color: #4fc3f7;
+}
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background-color: #2d2d2d;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 480px;
+    box-sizing: border-box;
+}
+canvas {
+    background-color: #000;
+    border: 2px solid #333;
+    border-radius: 8px;
+    cursor: crosshair;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+section {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.label {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #4fc3f7;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+}
+.slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+    gap: 15px;
+}
+.slider-row span {
+    font-size: 0.85rem;
+    font-weight: bold;
+    min-width: 90px;
+    color: #bbb;
+}
+input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+}
+.full-slider {
+    width: 100%;
+    margin-top: 5px;
+}
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+button {
+    flex: 1;
+    min-width: 80px;
+    padding: 12px;
+    cursor: pointer;
+    background: #3a3a3a;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+button:hover {
+    background: #4a4a4a;
+    border-color: #888;
+}
+#clearButton {
+    background: #c62828;
+    border-color: #d32f2f;
+}
+#clearButton:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4);
+}
+#drawPictureButton {
+    background: #2e7d32;
+    border-color: #4caf50;
+}
+#drawPictureButton:hover {
+    background: #388e3c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+.active-btn {
+    background: #0288d1 !important;
+    border-color: #03a9f4;
+}
+.rainbow-on {
+    background: linear-gradient(to right, 
+        #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff
+    ) !important;
+    border-color: #fff !important;
+    color: white !important;
+    text-shadow: 1px 1px 2px black;
+}
+#drawing {
+    width: 400px;
+    height: 400px;
+    display: block;
+    margin: 10px auto; /* Centers the image within the card */
+    border: 1px solid #555;
+    border-radius: 4px;
+    object-fit: cover; /* Ensures the sketch fills the 400x400 area neatly */
+    background-color: #fff; /* White background for the sketch to pop */
+}
+.info-card {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ffb74d;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+/**
+ * Bottom Navigation and Divider Styling
+ */
+
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #444; /* Slightly darker to blend with background */
+    margin: 20px 0 15px 0;
+    /* Subtle blue glow to match the header theme */
+    box-shadow: 0 1px 0 rgba(79, 195, 247, 0.1);
+}
+
+.home-link-container {
+    text-align: center;
+    margin-top: 5px;
+    padding-bottom: 10px; /* Extra padding at the very bottom of the card */
+}
+
+.home-link {
+    color: #4fc3f7; /* Primary theme blue */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.home-link:hover {
+    color: #e1f5fe; /* Requested Light Blue hover state */
+    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(225, 245, 254, 0.4);
+    transform: translateY(-1px); /* Subtle lift effect */
+}
+
+
+---------- FILE: ./asgn1.html ----------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Jonathan Cody">
+    <title>Assignment 1: WebGL Paint</title>
+    <link rel="stylesheet" href="asgn1.css">
+</head>
+<body onload="main()">
+    <h1>WebGL Paint Program</h1>
+    <div class="main-container">
+        <!-- Canvas at the top of the card -->
+        <canvas id="webgl" width="400" height="400">
+            Please use a browser that supports "canvas"
+        </canvas>
+        <!-- UI Controls Stacked below -->
+        <div class="controls">
+            <section>
+                <div class="button-group">
+                    <button id="clearButton">Clear Canvas</button>
+                    <button id="drawPictureButton">Draw Special Picture</button>
+                </div>
+            </section>
+            <section>
+                <div class="label">Drawing Mode:</div>
+                <div class="button-group">
+                    <button id="squareButton" class="active-btn">Squares</button>
+                    <button id="triangleButton">Triangles</button>
+                    <button id="circleButton">Circles</button>
+                </div>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button id="rainbowButton" class="toggle-btn">Rainbow Mode: OFF</button>
+                </div>
+            </section>
+            <section>
+                <div class="label">Color & Alpha:</div>
+                <div class="slider-row">
+                    <span>Red (0-255)</span> 
+                    <input type="range" id="redSlider" min="0" max="255" value="255">
+                </div>
+                <div class="slider-row">
+                    <span>Green (0-255)</span> 
+                    <input type="range" id="greenSlider" min="0" max="255" value="0">
+                </div>
+                <div class="slider-row">
+                    <span>Blue (0-255)</span> 
+                    <input type="range" id="blueSlider" min="0" max="255" value="0">
+                </div>
+                <div class="slider-row">
+                    <span>Alpha (0-100)</span> 
+                    <input type="range" id="alphaSlider" min="0" max="100" value="100">
+                </div>
+            </section>
+            <section>
+                <div class="label">Shape Size:</div>
+                <input type="range" id="sizeSlider" min="5" max="100" value="20" class="full-slider">
+                <div class="label" style="margin-top: 15px;">Circle Segments (3-40):</div>
+                <input type="range" id="segmentSlider" min="3" max="40" value="10" class="full-slider">
+            </section>
+            <!-- Bottom Contact Info -->
+            <div class="info-card">
+                <strong>Jonathan Cody</strong><br>
+                jdcody@ucsc.edu<br><br>
+                <strong>Notes to Grader:</strong> Detailed picture uses 25+ triangles. Initials JDC are Red, Green, and Blue. Implemented Alpha blending and full-spectrum Rainbow Mode.<br><br>
+                <strong>Original Hand-Drawn Sketch:</strong><br>
+                <!-- Add the image here -->
+                <img src="drawing.jpg" id="drawing" alt="Reference Drawing">
+            </div>
+            <hr class="card-divider">
+            <!-- Navigation outside the info-card -->
+            <div class="home-link-container">
+                <a href="../../index.html" class="home-link">&larr; Back to Portfolio Home</a>
+            </div>
+        </div>
+    </div>
+    <!-- Libraries -->
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <!-- Shape Classes -->
+    <script src="Point.js"></script>
+    <script src="Triangle.js"></script>
+    <script src="Circle.js"></script>
+    <!-- Main -->
+    <script src="asgn1.js"></script>
+</body>
+</html>
+
+
+---------- FILE: ./asgn1.js ----------
+
+// Globals
+let canvas, gl, a_Position, u_FragColor, u_Size;
+let g_selectedColor = [1.0, 0.0, 0.0, 1.0];
+let g_selectedSize = 20.0;
+let g_selectedType = 'point';
+let g_selectedSegments = 10;
+let g_shapesList = [];
+let g_rainbowMode = false;
+
+const VSHADER_SOURCE = `
+    attribute vec4 a_Position;
+    uniform float u_Size;
+    void main() {
+        gl_Position = a_Position;
+        gl_PointSize = u_Size;
+    }`;
+
+const FSHADER_SOURCE = `
+    precision mediump float;
+    uniform vec4 u_FragColor;
+    void main() {
+        gl_FragColor = u_FragColor;
+    }`;
+
+function setupWebGL() {
+    canvas = document.getElementById('webgl');
+    gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+}
+
+function connectVariablesToGLSL() {
+    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        return;
+    }
+    a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+    u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    u_Size = gl.getUniformLocation(gl.program, 'u_Size');
+}
+
+function updateActiveBtn(btn) {
+    const modes = [
+        document.getElementById('squareButton'),
+        document.getElementById('triangleButton'),
+        document.getElementById('circleButton')
+    ];
+    modes.forEach(b => b.classList.remove('active-btn'));
+    btn.classList.add('active-btn');
+}
+
+function handleMouseClick(ev) {
+    let x = ev.clientX, y = ev.clientY;
+    let rect = ev.target.getBoundingClientRect();
+    x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
+    y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
+
+    let shape;
+    if (g_selectedType === 'point') {
+        shape = new Point();
+    } else if (g_selectedType === 'triangle') {
+        shape = new Triangle();
+    } else {
+        shape = new Circle();
+        shape.segments = g_selectedSegments;
+    }
+
+    shape.position = [x, y];
+    shape.size = g_selectedSize;
+    shape.color = g_rainbowMode ? [Math.random(), Math.random(), Math.random(), g_selectedColor[3]] : [...g_selectedColor];
+
+    g_shapesList.push(shape);
+}
+
+function renderAllShapes() {
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    for (let i = 0; i < g_shapesList.length; i += 1) {
+        g_shapesList[i].render();
+    }
+}
+
+// Render loop function
+function tick() {
+    renderAllShapes();
+    requestAnimationFrame(tick);
+}
+
+function drawSpecialPicture() {
+    g_shapesList = []; // Clear previous shapes
+
+    // Helper to add triangles to list for the persistent loop
+    const addT = (verts, color) => g_shapesList.push(new CustomTriangle(verts, color));
+
+    // Scenery Background
+    addT([-1.0, -0.4, 0.0, -0.4, -0.5, 0.2], [0.4, 0.3, 0.2, 1.0]);
+    addT([0.0, -0.4, 1.0, -0.4, 0.5, 0.1], [0.4, 0.3, 0.2, 1.0]);
+    addT([-1.0, -1.0, 1.0, -1.0, 0.0, -0.4], [0.2, 0.2, 0.2, 1.0]);
+
+    // Initials JDC
+    addT([-0.6, 0.4, -0.5, 0.4, -0.6, -0.1], [1.0, 0.0, 0.0, 1.0]); // J
+    addT([-0.6, -0.1, -0.5, -0.1, -0.7, -0.3], [1.0, 0.0, 0.0, 1.0]);
+    addT([-0.1, 0.4, 0.0, 0.4, -0.1, -0.1], [0.0, 1.0, 0.0, 1.0]); // D
+    addT([0.0, 0.4, 0.2, 0.15, 0.0, -0.1], [0.0, 1.0, 0.0, 1.0]);
+    addT([0.4, 0.4, 0.7, 0.4, 0.4, 0.35], [0.0, 0.5, 1.0, 1.0]);   // C
+    addT([0.4, 0.4, 0.45, 0.4, 0.4, -0.1], [0.0, 0.5, 1.0, 1.0]);
+    addT([0.4, -0.1, 0.7, -0.1, 0.4, -0.05], [0.0, 0.5, 1.0, 1.0]);
+
+    // Sun
+    for (let i = 0; i < 20; i++) {
+        let a1 = (i / 20) * Math.PI * 2;
+        let a2 = ((i + 1) / 20) * Math.PI * 2;
+        addT([0.7, 0.7, 0.7 + Math.cos(a1) * 0.2, 0.7 + Math.sin(a1) * 0.2, 0.7 + Math.cos(a2) * 0.2, 0.7 + Math.sin(a2) * 0.2], [1.0, 0.8, 0.0, 1.0]);
+    }
+}
+
+function addActionsForHtmlUI() {
+    g_selectedColor[0] = document.getElementById('redSlider').value / 255;
+    g_selectedColor[1] = document.getElementById('greenSlider').value / 255;
+    g_selectedColor[2] = document.getElementById('blueSlider').value / 255;
+    g_selectedColor[3] = document.getElementById('alphaSlider').value / 100;
+    g_selectedSize = document.getElementById('sizeSlider').value;
+    g_selectedSegments = document.getElementById('segmentSlider').value;
+
+    document.getElementById('redSlider').oninput = function () { g_selectedColor[0] = this.value / 255; };
+    document.getElementById('greenSlider').oninput = function () { g_selectedColor[1] = this.value / 255; };
+    document.getElementById('blueSlider').oninput = function () { g_selectedColor[2] = this.value / 255; };
+    document.getElementById('alphaSlider').oninput = function () { g_selectedColor[3] = this.value / 100; };
+    document.getElementById('sizeSlider').oninput = function () { g_selectedSize = this.value; };
+    document.getElementById('segmentSlider').oninput = function () { g_selectedSegments = this.value; };
+
+    document.getElementById('clearButton').onclick = function () { g_shapesList = []; };
+    document.getElementById('squareButton').onclick = function () { g_selectedType = 'point'; updateActiveBtn(this); };
+    document.getElementById('triangleButton').onclick = function () { g_selectedType = 'triangle'; updateActiveBtn(this); };
+    document.getElementById('circleButton').onclick = function () { g_selectedType = 'circle'; updateActiveBtn(this); };
+    document.getElementById('rainbowButton').onclick = function() {
+        g_rainbowMode = !g_rainbowMode;
+        this.innerText = `Rainbow Mode: ${g_rainbowMode ? "ON" : "OFF"}`;
+        this.classList.toggle('rainbow-on', g_rainbowMode);
+    };
+    document.getElementById('drawPictureButton').onclick = drawSpecialPicture;
+}
+
+function main() {
+    setupWebGL();
+    connectVariablesToGLSL();
+    addActionsForHtmlUI();
+    canvas.onmousedown = handleMouseClick;
+    canvas.onmousemove = function (ev) { if (ev.buttons == 1) handleMouseClick(ev); };
+    gl.clearColor(0.05, 0.05, 0.05, 1.0);
+
+    // Start the render loop
+    requestAnimationFrame(tick);
+}
+
+
+---------- FILE: ./Circle.js ----------
+
+class Circle {
+    constructor() {
+        this.type = 'circle';
+        this.position = [0.0, 0.0];
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.size = 5.0;
+        this.segments = 10;
+
+        // Lab 2 Optimizations
+        this.buffer = null;
+        this.vertices = null;
+    }
+
+    generateVertices() {
+        let [x, y] = this.position;
+        let d = this.size / 200.0;
+        let v = [];
+        let step = 360 / this.segments;
+        for (let i = 0; i < 360; i += step) {
+            let a1 = i * Math.PI / 180;
+            let a2 = (i + step) * Math.PI / 180;
+            // Add center and two edge points for each triangle segment
+            v.push(x, y, x + Math.cos(a1) * d, y + Math.sin(a1) * d, x + Math.cos(a2) * d, y + Math.sin(a2) * d);
+        }
+        this.vertices = new Float32Array(v);
+    }
+
+    render() {
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+
+        if (this.vertices === null) {
+            this.generateVertices();
+        }
+        if (this.buffer === null) {
+            this.buffer = gl.createBuffer();
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLES, 0, this.vertices.length / 2);
+    }
+}
+
+
+---------- FILE: ./Point.js ----------
+
+class Point {
+    constructor() {
+        this.type = 'point';
+        this.position = [0.0, 0.0];
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.size = 5.0;
+    }
+
+    render() {
+        gl.disableVertexAttribArray(a_Position);
+        gl.vertexAttrib3f(a_Position, this.position[0], this.position[1], 0.0);
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        gl.uniform1f(u_Size, this.size);
+        gl.drawArrays(gl.POINTS, 0, 1);
+    }
+}
+
+
+---------- FILE: ./Triangle.js ----------
+
+class Triangle {
+    constructor() {
+        this.type = 'triangle';
+        this.position = [0.0, 0.0];
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.size = 5.0;
+        this.buffer = null;
+        this.vertices = null;
+    }
+
+    render() {
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        gl.uniform1f(u_Size, this.size);
+        if (this.vertices === null) {
+            let [x, y] = this.position;
+            let d = this.size / 200.0;
+
+            // Equilateral Triangle Math:
+            // Height = side * sqrt(3)/2 ≈ side * 0.866
+            let h = d * (Math.sqrt(3) / 2);
+
+            // Center the triangle on the mouse click
+            this.vertices = new Float32Array([
+                x - d/2, y - h/3,   // Bottom Left
+                x + d/2, y - h/3,   // Bottom Right
+                x,       y + 2*h/3  // Top Tip
+            ]);
+        }
+        if (this.buffer === null) {
+            this.buffer = gl.createBuffer();
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+}
+
+// Specialized Triangle class for shapes with unique coordinates
+class CustomTriangle {
+    constructor(vertices, color) {
+        this.vertices = new Float32Array(vertices);
+        this.color = color;
+        this.buffer = null;
+    }
+
+    render() {
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        if (this.buffer === null) {
+            this.buffer = gl.createBuffer();
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.DYNAMIC_DRAW);
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLES, 0, this.vertices.length / 2);
+    }
+}

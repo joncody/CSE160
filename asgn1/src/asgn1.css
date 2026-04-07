@@ -68,6 +68,17 @@ input[type="range"] {
     flex: 1;
     cursor: pointer;
 }
+/* Add this to asgn1.css */
+input[type="range"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+/* Optional: dim the text label as well when disabled */
+input[type="range"]:disabled + span,
+.slider-row:has(input:disabled) span {
+    color: #666;
+}
 .full-slider {
     width: 100%;
     margin-top: 5px;
