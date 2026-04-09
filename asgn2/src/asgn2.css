@@ -1,0 +1,71 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #ece7df;
+  color: #222;
+}
+
+.main-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+#webgl {
+  border: 1px solid #888;
+  background: #d8d8d8;
+}
+
+.controls {
+  width: 280px;
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.controls h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.controls label {
+  display: block;
+  margin: 12px 0;
+}
+
+.controls input[type="range"] {
+  width: 100%;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  background: #6b4b2a;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #4f361d;
+}
+
+#perf {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.tip {
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #444;
+}

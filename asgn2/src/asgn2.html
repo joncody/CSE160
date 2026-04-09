@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assignment 2: Scorpion</title>
+  <link rel="stylesheet" href="asgn2.css">
+</head>
+<body onload="main()">
+  <div class="main-container">
+    <div>
+      <canvas id="webgl" width="700" height="700"></canvas>
+      <p id="perf">FPS: 0</p>
+    </div>
+
+    <div class="controls">
+      <h2>Scorpion Controls</h2>
+
+      <div class="button-row">
+        <button id="animOn">Animation ON</button>
+        <button id="animOff">Animation OFF</button>
+      </div>
+
+      <label>
+        Tail Base
+        <input type="range" id="tail1" min="-45" max="0" value="0" />
+      </label>
+
+      <label>
+        Tail Tip
+        <input type="range" id="tail2" min="-30" max="15" value="0" />
+      </label>
+      <label>
+        Arm Base
+        <input type="range" id="armBase" min="-45" max="45" value="0" />
+      </label>
+
+      <label>
+        Arm Elbow
+        <input type="range" id="armElbow" min="-30" max="30" value="0" />
+      </label>
+      <label>
+        Claws
+        <input type="range" id="pincer" min="-15" max="15" value="0" />
+      </label>
+
+      <div class="tip">
+        <b>Drag</b> to rotate<br />
+        <b>Shift + Click</b> to strike
+      </div>
+    </div>
+  </div>
+
+  <script src="../lib/cuon-utils.js"></script>
+  <script src="../lib/cuon-matrix-cse160.js"></script>
+  <script src="../lib/webgl-utils.js"></script>
+  <script src="../lib/webgl-debug.js"></script>
+
+  <script src="Cube.js"></script>
+  <script src="Pyramid.js"></script>
+
+  <script src="asgn2.js"></script>
+</body>
+</html>
