@@ -1,4 +1,4 @@
-# Assignment 3: Blocky World (Scorpion Quest)
+# Assignment 3: Virtual World
 **Jon Cody** - jdcody@ucsc.edu
 
 ## Notes to Grader:
