@@ -1,6 +1,5 @@
 /**
- * Assignment 3: Scorpion Quest Final
- * Formatted: 4-space tabs, expanded objects, braced if-blocks.
+ * Assignment 3: Virtual World
  */
 
 const VSHADER_SOURCE = `

@@ -1,0 +1,717 @@
+
+
+---------- FILE: ./README.md ----------
+
+# Assignment 2: Blocky Animal (3D Hierarchical Scorpion)
+**Jon Cody** - jdcody@ucsc.edu
+
+## Notes to Grader:
+All basic and advanced requirements for Assignment 2 have been successfully implemented. The application renders a complex 3D Scorpion model using a hierarchical transformation system. Each limb and segment is built using custom `Cube` and `Pyramid` primitive classes.
+
+The model features a deeply nested hierarchy:
+*   **Body (Mesosoma):** Four segments that exhibit a side-to-side breathing/sway animation.
+*   **Tail (Metasoma):** A 5-segment chain that inherits rotations from the base to the tip, ending in a bulb and needle-tipped stinger.
+*   **Arms & Pincers:** Multi-jointed arms (base and elbow) with functional pincers consisting of a fixed upper finger and a movable lower finger.
+*   **Legs:** Eight legs, each consisting of three distinct joints (hip, knee, and foot) that move in synchronized walking patterns when animation is active.
+
+## Awesomeness (Creativity):
+1.  **Additive "Strike" Animation:** Triggered by **Shift + Click**, the scorpion performs a dynamic strike. This is implemented using a "snap" curve (a partial sine wave) that calculates a `strikePower` value. This power is applied as a high-intensity additive offset to the tail, arms, body lunge, and pincers. Because it is additive, the strike "whips" forward from whatever pose the user has currently set via the sliders, creating a reactive and fluid movement.
+2.  **Interactive Camera & Zoom:** The camera system supports intuitive mouse controls alongside traditional sliders. Users can **click-and-drag** on the canvas to rotate the scorpion in 3D space and use the **mouse wheel** to zoom in or out. The UI sliders automatically synchronize with these mouse movements to provide consistent visual feedback.
+3.  **Static GPU Buffer Optimization:** To maintain high performance and FPS, the `Cube` and `Pyramid` classes utilize static buffer initialization. Vertex data is buffered to the GPU exactly once upon the first instantiation and shared across all subsequent renders, significantly reducing the overhead of drawing dozens of hierarchical parts every frame.
+
+## Directory Structure:
+
+    .
+    ├── lib
+    │   ├── cuon-matrix-cse160.js
+    │   ├── cuon-utils.js
+    │   ├── webgl-debug.js
+    │   └── webgl-utils.js
+    ├── README.md
+    └── src
+        ├── asgn2.css
+        ├── asgn2.html
+        ├── asgn2.js
+        ├── Cube.js
+        └── Pyramid.js
+
+## How to Run:
+1. Navigate to the `src` directory.
+2. Open `asgn2.html` in a modern web browser (Chrome or Firefox recommended).
+3. Use the **Joint Sliders** to manually manipulate the tail, arms, and pincers.
+4. Toggle **Animation ON/OFF** to see the idle breathing and leg-walking movements.
+5. **Left-Click and Drag** on the canvas to rotate the model.
+6. **Scroll the Mouse Wheel** to zoom the camera.
+7. **Shift + Click** anywhere on the canvas to trigger the additive "Strike" animation.
+
+## Features Implemented:
+- **Hierarchical Modeling:** Complex 3D transformations where child parts (like the stinger or pincer fingers) correctly follow parent movements.
+- **3D Primitives:** Object-oriented implementation of Cubes and Pyramids with dedicated `render()` methods.
+- **Perspective & View Control:** Global rotation and scaling matrices controlled via `u_GlobalRotateMatrix`.
+- **Dynamic Animation Engine:** Real-time sine-wave based oscillations for organic "idle" movement and high-frequency "snap" curves for the strike.
+- **Interactive UI:** A comprehensive control panel for joint manipulation and real-time performance monitoring (FPS/ms).
+- **Depth Testing:** Proper 3D occlusion using WebGL's depth buffer.
+
+
+---------- FILE: ./src/asgn2.css ----------
+
+/* --- Global Styles --- */
+body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    margin: 0;
+}
+h1 {
+    color: #4fc3f7;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+    text-align: center;
+}
+.main-container {
+    background-color: #2d2d2d;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column; /* Moves controls underneath */
+    align-items: center;
+    border-top: 4px solid #4fc3f7;
+    width: 750px; /* Adjusted to fit 700px canvas + padding */
+}
+#webgl {
+    border: 1px solid #444;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: crosshair;
+}
+#perf {
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #4fc3f7;
+}
+.controls {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+section {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+.label-title {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #4fc3f7;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+}
+.control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.control-row span {
+    font-size: 0.9rem;
+    color: #bbb;
+    min-width: 100px;
+}
+input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+    accent-color: #4fc3f7;
+}
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #555;
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+button:hover {
+    background-color: #444;
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+}
+.tip {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #999;
+    text-align: center;
+    padding-top: 15px;
+    width: 100%;
+}
+.tip b {
+    color: #4fc3f7;
+}
+.active-btn {
+    background-color: #0288d1 !important;
+    border-color: #03a9f4 !important;
+    color: white !important;
+    box-shadow: 0 0 8px rgba(3, 169, 244, 0.5);
+}
+.control-row span {
+    font-size: 0.85rem;
+    color: #bbb;
+    font-weight: bold;
+}
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #444;
+    margin: 20px 0 15px 0;
+    box-shadow: 0 1px 0 rgba(79, 195, 247, 0.1);
+}
+.home-link-container {
+    text-align: center;
+    margin-top: 5px;
+    padding-bottom: 10px;
+}
+.home-link {
+    color: #4fc3f7;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+.home-link:hover {
+    color: #e1f5fe;
+    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(225, 245, 254, 0.4);
+    transform: translateY(-1px);
+}
+
+
+---------- FILE: ./src/asgn2.html ----------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Assignment 2: Scorpion</title>
+    <link rel="stylesheet" href="asgn2.css">
+</head>
+<body onload="main()">
+    <h1>Assignment 2: 3D Scorpion</h1>
+    <div class="main-container">
+        <!-- Top: Canvas and Stats -->
+        <canvas id="webgl" width="700" height="700"></canvas>
+        <p id="perf">FPS: 0</p>
+        <!-- Bottom: Controls Area -->
+        <div class="controls">
+            <section>
+                <span class="label-title">Camera & View</span>
+                <div class="control-row">
+                    <span>Zoom</span>
+                    <input type="range" id="zoomSlider" min="10" max="200" value="100" />
+                </div>
+                <div class="control-row">
+                    <span>Rotation</span>
+                    <input type="range" id="angleSlider" min="0" max="360" value="35" />
+                </div>
+            </section>
+            <section>
+                <span class="label-title">Animation Controls</span>
+                <div class="button-row">
+                    <button id="animOn" class="active-btn">Animation ON</button>
+                    <button id="animOff">Animation OFF</button>
+                </div>
+            </section>
+            <section>
+                <span class="label-title">Tail & Body Joints</span>
+                <div class="control-row">
+                    <span>Tail Base</span>
+                    <input type="range" id="tail1" min="-45" max="0" value="0" />
+                </div>
+                <div class="control-row">
+                    <span>Tail Tip</span>
+                    <input type="range" id="tail2" min="-30" max="15" value="0" />
+                </div>
+            </section>
+            <section>
+                <span class="label-title">Arm & Pincer Joints</span>
+                <div class="control-row">
+                    <span>Arm Base</span>
+                    <input type="range" id="armBase" min="-45" max="45" value="0" />
+                </div>
+                <div class="control-row">
+                    <span>Arm Elbow</span>
+                    <input type="range" id="armElbow" min="-30" max="30" value="0" />
+                </div>
+                <div class="control-row">
+                    <span>Pincer Snap</span>
+                    <input type="range" id="pincer" min="-15" max="15" value="0" />
+                </div>
+            </section>
+            <div class="tip">
+                <b>Drag Mouse</b> to rotate view &bull; <b>Mouse Wheel</b> to zoom in/out &bull; <b>Shift + Click</b> to trigger Strike animation
+            </div>
+            <hr class="card-divider">
+            <!-- Navigation outside the info-card -->
+            <div class="home-link-container">
+                <a href="../../index.html" class="home-link">&larr; Back to Portfolio Home</a>
+            </div>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Pyramid.js"></script>
+    <script src="asgn2.js"></script>
+</body>
+</html>
+
+
+---------- FILE: ./src/asgn2.js ----------
+
+// --- SHADERS ---
+const VSHADER_SOURCE = `
+    attribute vec4 a_Position;
+    uniform mat4 u_ModelMatrix;
+    uniform mat4 u_GlobalRotateMatrix;
+    void main() {
+        gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+    }`;
+
+const FSHADER_SOURCE = `
+    precision mediump float;
+    uniform vec4 u_FragColor;
+    void main() {
+        gl_FragColor = u_FragColor;
+    }`;
+
+// --- GLOBALS ---
+let canvas, gl, a_Position, u_FragColor, u_ModelMatrix, u_GlobalRotateMatrix;
+let g_globalAngleX = 35;
+let g_globalAngleY = -20;
+let g_globalZoom = 1.0;
+// UI State (Manual Sliders)
+let g_animation = true;
+let g_tail1Angle = 0;
+let g_tail2Angle = 0;
+let g_armAngle = 0;
+let g_elbowAngle = 0;
+let g_pincerAngle = 0;
+// Animation Offsets (Oscillations)
+let g_bodyLunge = 0;
+let g_bodySway = 0;
+let g_tail1Osc = 0;
+let g_tail2Osc = 0;
+let g_pincerOsc = 0;
+let g_armOsc = 0;
+let g_elbowOsc = 0;
+let g_strikeAnimation = false;
+let g_strikeTime = 0;
+// Time & Performance
+let g_seconds = 0;
+let g_startTime = performance.now() / 1000;
+let g_lastFpsTime = performance.now();
+let g_frameCount = 0;
+let g_fps = 0;
+let g_shapes = {};
+
+// --- INITIALIZATION ---
+
+function setupWebGL() {
+    canvas = document.getElementById('webgl');
+    gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+    if (!gl) {
+        return;
+    }
+    gl.enable(gl.DEPTH_TEST);
+}
+
+function connectVariablesToGLSL() {
+    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        return;
+    }
+    a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+    u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+    u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
+}
+
+function updateAnimationAngles() {
+    // Standard background animations
+    if (g_animation) {
+        g_bodySway = 5 * Math.sin(g_seconds * 1.5);
+        g_tail1Osc = 10 * Math.sin(g_seconds * 2);
+        g_tail2Osc = 5 * Math.sin(g_seconds * 2);
+        g_pincerOsc = 5 * Math.sin(g_seconds * 4);
+        g_armOsc = 10 * Math.sin(g_seconds * 1.5);
+        g_elbowOsc = 10 * Math.sin(g_seconds * 1.5 + 0.5);
+    } else {
+        g_bodySway = g_tail1Osc = g_tail2Osc = g_pincerOsc = g_armOsc = g_elbowOsc = 0;
+    }
+    // POKE ANIMATION: The Strike
+    if (g_strikeAnimation) {
+        let t = g_seconds - g_strikeTime; // Time since click
+        let duration = 0.7; // Fast strike duration
+        if (t < duration) {
+                // A "snap" curve: fast lunge forward, slower return
+                // We use a high-frequency sine partial to create a whip effect
+                let strikePower = Math.sin((t / duration) * Math.PI);
+                g_bodyLunge = -0.1 * strikePower; // Lunge forward
+                g_tail1Osc = -110 * strikePower; // Whip tail forwaard
+                g_tail2Osc = -5 * strikePower; // Whip tail forwaard
+                g_pincerOsc = 35 * strikePower; // Snap pincers
+                g_armOsc = 45 * strikePower; // Pull arms forward/inward
+        } else {
+                g_strikeAnimation = false;
+                g_bodyLunge = 0;
+        }
+    }
+}
+
+// --- RENDERING ---
+
+function drawScorpion() {
+    // --- BASE COORDINATES ---
+    let bodyMatrix = new Matrix4();
+    bodyMatrix.setTranslate(0, -0.1, g_bodyLunge);
+    // Apply Body Sway (Side-to-side breathing)
+    bodyMatrix.rotate(g_bodySway, 0, 1, 0);
+    // --- SEGMENTED BODY (Mesosoma) ---
+    for (let i = 0; i < 4; i++) {
+        let segment = g_shapes.cube;
+        segment.color = [0.0, 0.3 + (i * 0.05), 0.25 + (i * 0.05), 1.0];
+        segment.matrix.set(bodyMatrix);
+        let scale = 1.0 - (i * 0.1);
+        segment.matrix.translate(-0.15 * scale, 0, i * 0.12 - 0.2);
+        segment.matrix.scale(0.3 * scale, 0.18 * scale, 0.15);
+        segment.render();
+    }
+    // --- HEAD (Prosoma) ---
+    let head = g_shapes.cube;
+    head.color = [0.0, 0.4, 0.35, 1.0];
+    head.matrix.set(bodyMatrix);
+    head.matrix.translate(-0.2, -0.02, -0.38);
+    head.matrix.scale(0.4, 0.22, 0.25);
+    head.render();
+    // --- THE TAIL (Metasoma) ---
+    let tailCoords = new Matrix4(bodyMatrix);
+    tailCoords.translate(0, 0.04, 0.3);
+    for (let i = 0; i < 5; i++) {
+        let tSeg = g_shapes.cube;
+        tSeg.color = [0.0, 0.3 + (i * 0.05), 0.3, 1.0];
+        // Joint logic: Slider + Oscillation
+        let angle = (i === 0) ? (parseFloat(g_tail1Angle) + g_tail1Osc) : (parseFloat(g_tail2Angle) - 15 + g_tail2Osc);
+        tailCoords.rotate(angle, 1, 0, 0);
+        tSeg.matrix.set(tailCoords);
+        tSeg.matrix.translate(-0.04, 0, 0);
+        tSeg.matrix.scale(0.08, 0.08, 0.18);
+        tSeg.render();
+        tailCoords.translate(0, 0, 0.18);
+        tailCoords.scale(0.92, 0.92, 1.0);
+    }
+    // --- STINGER ---
+    let bulb = g_shapes.cube;
+    bulb.color = [0.0, 0.6, 0.5, 1.0];
+    bulb.matrix.set(tailCoords);
+    bulb.matrix.translate(-0.05, -0.02, 0);
+    bulb.matrix.scale(0.1, 0.12, 0.12);
+    bulb.render();
+    let needle = g_shapes.pyramid;
+    needle.color = [0.8, 0.1, 0.1, 1.0];
+    needle.matrix.set(tailCoords);
+    needle.matrix.translate(-0.02, 0.1, 0);
+    needle.matrix.scale(0.04, 0.25, 0.04);
+    needle.render();
+
+    function drawArm(isLeft) {
+        let side = isLeft ? -1 : 1;
+        let m = new Matrix4(bodyMatrix);
+        m.scale(side, 1, 1);
+        // Calculate total additive angles
+        let totalArmBase = parseFloat(g_armAngle) + g_armOsc;
+        let totalElbow = 110 + parseFloat(g_elbowAngle) + g_elbowOsc - (totalArmBase * 0.6);
+        let totalPincer = parseFloat(g_pincerAngle) + g_pincerOsc;
+        // Segment 1: Upper Arm
+        m.translate(0.15, 0.05, -0.3);
+        m.rotate(-5 + totalArmBase, 0, 1, 0);
+        let armPart = g_shapes.cube;
+        armPart.color = [0.0, 0.3, 0.25, 1.0];
+        armPart.matrix.set(m);
+        armPart.matrix.scale(0.3, 0.08, 0.08);
+        armPart.render();
+        // Segment 2: Lower Arm (Crescent Elbow)
+        m.translate(0.3, 0, 0);
+        m.rotate(totalElbow, 0, 1, 0);
+        armPart.matrix.set(m);
+        armPart.matrix.scale(0.25, 0.08, 0.08);
+        armPart.render();
+        // Segment 3: Pincer Bulb
+        m.translate(0.25, -0.06, 0.0);
+        let bulb = g_shapes.cube;
+        bulb.color = [0.0, 0.5, 0.4, 1.0];
+        bulb.matrix.set(m);
+        bulb.matrix.scale(0.3, 0.2, 0.1);
+        bulb.render();
+        // --- FINGERS ---
+        // Top Finger (Fixed)
+        let topF = g_shapes.pyramid;
+        topF.color = [0.0, 0.35, 0.3, 1.0];
+        let tfm = new Matrix4(m);
+        tfm.translate(0.3, 0.15, 0.05);
+        tfm.rotate(-90, 0, 0, 1);
+        topF.matrix.set(tfm);
+        topF.matrix.scale(0.08, 0.32, 0.08);
+        topF.matrix.translate(-0.5, 0, -0.5);
+        topF.render();
+        // Bottom Finger (Movable Snap)
+        let botF = g_shapes.pyramid;
+        botF.color = [0.0, 0.45, 0.4, 1.0];
+        let bfm = new Matrix4(m);
+        bfm.translate(0.3, 0.05, 0.05);
+        bfm.rotate(totalPincer, 0, 0, 1);
+        bfm.rotate(-90, 0, 0, 1);
+        botF.matrix.set(bfm);
+        botF.matrix.scale(0.08, 0.32, 0.08);
+        botF.matrix.translate(-0.5, 0, -0.5);
+        botF.render();
+    }
+    drawArm(true);
+    drawArm(false);
+
+    function drawLeg(index, isLeft) {
+        let side = isLeft ? -1 : 1;
+        let scale = 1.0 - (index * 0.1);
+        let zPos = index * 0.12 - 0.12;
+        let walk = g_animation ? 15 * Math.sin(g_seconds * 5 + index) : 0;
+        let m = new Matrix4(bodyMatrix);
+        m.translate(side * 0.15 * scale, 0.05, zPos);
+        // Joint 1: Hip
+        m.rotate(side * index * -20 + walk, 0, 1, 0);
+        m.rotate(side * 45, 0, 0, 1);
+        let legPart = g_shapes.cube;
+        legPart.color = [0.0, 0.2 + (index * 0.02), 0.15 + (index * 0.02), 1.0];
+        legPart.matrix.set(m);
+        legPart.matrix.scale(side * 0.2, 0.03, 0.03);
+        legPart.render();
+        // Joint 2: Knee
+        m.translate(side * 0.2, 0, 0);
+        m.rotate(side, 0, 1, 0);
+        m.rotate(side * -105, 0, 0, 1);
+        legPart.matrix.set(m);
+        legPart.matrix.scale(side * 0.25, 0.03, 0.03);
+        legPart.render();
+        // Joint 3: Foot
+        m.translate(side * 0.25, 0, 0);
+        m.rotate(side * 60, 0, 0, 1);
+        legPart.matrix.set(m);
+        legPart.matrix.scale(side * 0.1, 0.02, 0.02);
+        legPart.render();
+    }
+    for (let i = 0; i < 4; i++) {
+        drawLeg(i, true);
+        drawLeg(i, false);
+    }
+}
+
+// --- CORE LOOPS ---
+
+function tick() {
+    g_seconds = performance.now() / 1000 - g_startTime;
+    updateAnimationAngles();
+    renderScene();
+    g_frameCount++;
+    let now = performance.now();
+    if (now - g_lastFpsTime >= 1000) {
+        g_fps = g_frameCount;
+        g_frameCount = 0;
+        g_lastFpsTime = now;
+    }
+    requestAnimationFrame(tick);
+}
+
+function renderScene() {
+    let startTime = performance.now();
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    // Apply Zoom (Scale) and Rotation to the Global Matrix
+    let globalRotateMatrix = new Matrix4();
+    globalRotateMatrix.scale(g_globalZoom, g_globalZoom, g_globalZoom);
+    globalRotateMatrix.rotate(g_globalAngleY, 1, 0, 0);
+    globalRotateMatrix.rotate(g_globalAngleX, 0, 1, 0);
+    gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotateMatrix.elements);
+    drawScorpion();
+    // Performance calculation
+    let duration = performance.now() - startTime;
+    document.getElementById('perf').innerText = `ms: ${duration.toFixed(1)} FPS: ${g_fps}`;
+}
+
+function addActionsForHtmlUI() {
+    // Animation Toggle with Visual Feedback
+    document.getElementById('animOn').onclick = function() {
+        g_animation = true;
+        this.classList.add('active-btn');
+        document.getElementById('animOff').classList.remove('active-btn');
+    };
+    document.getElementById('animOff').onclick = function() {
+        g_animation = false;
+        this.classList.add('active-btn');
+        document.getElementById('animOn').classList.remove('active-btn');
+    };
+    // Zoom slider
+    document.getElementById('zoomSlider').oninput = function() {
+        g_globalZoom = this.value / 100.0;
+        renderScene();
+    };
+    // Global Rotation slider (syncs with mouse drag)
+    document.getElementById('angleSlider').oninput = function() {
+        g_globalAngleX = this.value;
+        renderScene();
+    };
+    // Joint sliders
+    document.getElementById('tail1').oninput = function() { g_tail1Angle = this.value; renderScene(); };
+    document.getElementById('tail2').oninput = function() { g_tail2Angle = this.value; renderScene(); };
+    document.getElementById('armBase').oninput = function() { g_armAngle = parseFloat(this.value); renderScene(); };
+    document.getElementById('armElbow').oninput = function() { g_elbowAngle = parseFloat(this.value); renderScene(); };
+    document.getElementById('pincer').oninput = function() { g_pincerAngle = this.value; renderScene(); };
+    // Mouse Wheel Zoom
+    canvas.onwheel = function(ev) {
+        ev.preventDefault(); // Prevent page from scrolling
+        let zoomAmount = ev.deltaY * -0.001; // Negative delta means scroll up
+        g_globalZoom = Math.min(Math.max(g_globalZoom + zoomAmount, 0.1), 2.0); // Clamp zoom
+        // Sync slider with wheel
+        document.getElementById('zoomSlider').value = g_globalZoom * 100;
+        renderScene();
+    };
+    // Mouse Interaction
+    canvas.onmousedown = (ev) => {
+        if (ev.shiftKey) {
+            g_strikeAnimation = true;
+            g_strikeTime = g_seconds;
+        }
+    };
+    canvas.onmousemove = (ev) => {
+        if (ev.buttons === 1) {
+            g_globalAngleX -= ev.movementX * 0.4;
+            g_globalAngleY += ev.movementY * 0.4;
+            // Update slider to match mouse rotation
+            document.getElementById('angleSlider').value = g_globalAngleX;
+        }
+    };
+}
+
+// --- ANIMATION ENGINE ---
+
+function main() {
+    setupWebGL();
+    connectVariablesToGLSL();
+    g_shapes.cube = new Cube();
+    g_shapes.pyramid = new Pyramid();
+    addActionsForHtmlUI();
+    gl.clearColor(0.86, 0.84, 0.82, 1.0);
+    requestAnimationFrame(tick);
+}
+
+
+---------- FILE: ./src/Cube.js ----------
+
+class Cube {
+    constructor() {
+        this.type = 'cube';
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.matrix = new Matrix4();
+
+        // Static variables to share one buffer across all Cube instances
+        if (Cube.viewBuffer === null) {
+            Cube.initBuffer();
+        }
+    }
+
+    static initBuffer() {
+        Cube.vertices = new Float32Array([
+            0,0,0, 1,1,0, 0,1,0,  0,0,0, 1,0,0, 1,1,0, // Front
+            0,1,0, 0,1,1, 1,1,1,  0,1,0, 1,1,1, 1,1,0, // Top
+            0,0,1, 0,1,1, 1,1,1,  0,0,1, 1,1,1, 1,0,1, // Back
+            0,0,0, 0,0,1, 1,0,1,  0,0,0, 1,0,1, 1,0,0, // Bottom
+            0,0,0, 0,1,0, 0,1,1,  0,0,0, 0,1,1, 0,0,1, // Left
+            1,0,0, 1,1,0, 1,1,1,  1,0,0, 1,1,1, 1,0,1  // Right
+        ]);
+        Cube.viewBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, Cube.viewBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, Cube.vertices, gl.STATIC_DRAW);
+    }
+
+    render() {
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
+        // Bind the shared buffer (extremely fast)
+        gl.bindBuffer(gl.ARRAY_BUFFER, Cube.viewBuffer);
+        gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+
+        // Draw the 36 vertices
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
+    }
+}
+// Initialize static properties
+Cube.viewBuffer = null;
+Cube.vertices = null;
+
+
+---------- FILE: ./src/Pyramid.js ----------
+
+class Pyramid {
+    constructor() {
+        this.type = 'pyramid';
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.matrix = new Matrix4();
+        if (Pyramid.viewBuffer === null) {
+            Pyramid.initBuffer();
+        }
+    }
+
+    static initBuffer() {
+        Pyramid.vertices = new Float32Array([
+            0,0,0,  0.5,1,0.5,  1,0,0, // Front
+            1,0,0,  0.5,1,0.5,  1,0,1, // Right
+            1,0,1,  0.5,1,0.5,  0,0,1, // Back
+            0,0,1,  0.5,1,0.5,  0,0,0, // Left
+            0,0,0,  1,0,0,  1,0,1,     // Base 1
+            0,0,0,  1,0,1,  0,0,1      // Base 2
+        ]);
+        Pyramid.viewBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, Pyramid.viewBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, Pyramid.vertices, gl.STATIC_DRAW);
+    }
+
+    render() {
+        gl.uniform4f(u_FragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+        gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+        gl.bindBuffer(gl.ARRAY_BUFFER, Pyramid.viewBuffer);
+        gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLES, 0, 18);
+    }
+}
+Pyramid.viewBuffer = null;
+Pyramid.vertices = null;
