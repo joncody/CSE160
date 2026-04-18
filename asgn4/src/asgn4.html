@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assignment 4: Full Lighting</title>
+    <link rel="stylesheet" href="asgn4.css">
+</head>
+<body onload="main()">
+    <h1>Assignment 4: Full Lighting</h1>
+    <div class="main-container">
+        <canvas id="webgl" width="700" height="700"></canvas>
+        <p id="perf">ms: 0.0 | FPS: 0</p>
+        <div class="controls">
+            <section>
+                <span class="label-title">Lighting Toggles</span>
+                <div class="button-row">
+                    <button id="btnLight" class="active-btn" onclick="toggleLight()">Point Light: ON</button>
+                    <button id="btnSpot" onclick="toggleSpot()">Spotlight: OFF</button>
+                </div>
+                <div class="button-row" style="margin-top: 10px;">
+                    <button id="btnNorm" onclick="toggleNormals()">Normal Viz: OFF</button>
+                    <button id="btnAnim" class="active-btn" onclick="toggleAnim()">Animate Light: ON</button>
+                </div>
+            </section>
+            <section>
+                <span class="label-title">Point Light Position & Color</span>
+                <div class="control-row">
+                    <span>Position X</span>
+                    <input type="range" min="-15" max="15" step="0.1" value="0" id="lightX">
+                </div>
+                <div class="control-row">
+                    <span>Position Y</span>
+                    <input type="range" min="-1" max="15" step="0.1" value="3" id="lightY">
+                </div>
+                <div class="control-row">
+                    <span>Position Z</span>
+                    <input type="range" min="-15" max="15" step="0.1" value="0" id="lightZ">
+                </div>
+                <div class="control-row">
+                    <span>Light Color</span>
+                    <input type="color" id="lightColor" value="#ffffff" style="flex: 1; height: 30px; border: none; background: none; cursor: pointer;">
+                </div>
+            </section>
+            <div class="tip">
+                <b>WASD</b> Walk &bull; <b>Mouse Drag</b> Look &bull; <b>X</b> Scorpion Strike
+            </div>
+            <hr class="card-divider">
+            <div class="home-link-container">
+                <a href="../../index.html" class="home-link">&larr; Back to Portfolio Home</a>
+            </div>
+        </div>
+    </div>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix-cse160.js"></script>
+    <script src="Camera.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Pyramid.js"></script>
+    <script src="Sphere.js"></script>
+    <script src="Model.js"></script>
+    <script src="asgn4.js"></script>
+</body>
+</html>

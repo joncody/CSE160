@@ -1,0 +1,131 @@
+body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    margin: 0;
+}
+h1 {
+    color: #4fc3f7;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+    text-align: center;
+}
+.main-container {
+    background-color: #2d2d2d;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 4px solid #4fc3f7;
+    width: 750px;
+}
+#webgl {
+    border: 1px solid #444;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: crosshair;
+}
+#perf {
+    margin: 10px 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #4fc3f7;
+}
+.controls {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+section {
+    background-color: #383838;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+.label-title {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #4fc3f7;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+}
+.control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.control-row span {
+    font-size: 0.85rem;
+    color: #bbb;
+    font-weight: bold;
+    min-width: 120px;
+}
+input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+    accent-color: #4fc3f7;
+}
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+button {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #555;
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+button:hover {
+    background-color: #444;
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+}
+.active-btn {
+    background-color: #0288d1 !important;
+    border-color: #03a9f4 !important;
+    color: white !important;
+}
+.tip {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #999;
+    text-align: center;
+    padding-top: 15px;
+}
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #444;
+    margin: 20px 0 15px 0;
+}
+.home-link-container {
+    text-align: center;
+}
+.home-link {
+    color: #4fc3f7;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+}
+.home-link:hover {
+    color: #e1f5fe;
+    text-decoration: underline;
+}
