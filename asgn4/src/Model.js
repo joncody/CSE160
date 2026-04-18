@@ -85,7 +85,6 @@ class Model {
         try {
             const response = await fetch(this.filePath);
             const text = await response.text();
-            console.log(text);
             this.parseModel(gl, text);
         } catch (e) {
             console.error("OBJ Error:", e);
