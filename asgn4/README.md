@@ -67,7 +67,7 @@ All requirements for Assignment 4 have been successfully implemented. This proje
 
 ## How to Run:
 1.  Navigate to the `src` directory.
-2.  **Crucial Note:** Due to browser security restrictions regarding `fetch()`, you **must** use a local server to run this assignment (e.g., VS Code "Live Server" or `python3 -m http.server`). Opening the `.html` file directly via `file://` will prevent the OBJ models and textures from loading. We also must use a Chromium based browser (Firefox has trouble rendering the contents of .obj files).
+2.  **Crucial Note:** Due to browser security restrictions regarding `fetch()`, you **must** use a local server to run this assignment (e.g., VS Code "Live Server" or `python3 -m http.server`). Opening the `.html` file directly via `file://` will prevent the OBJ models and textures from loading.
 3.  Use the UI sliders to change the light's color and position to see the Phong shading in action.
 
 ## Features Implemented (Rubric Checklist):
