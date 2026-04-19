@@ -55,8 +55,8 @@ All requirements for Assignment 4 have been successfully implemented. This proje
 │   ├── Pyramid.js
 │   ├── Sphere.js        <-- Smooth geometry for lighting check
 │   ├── Model.js         <-- Asynchronous OBJ Loader
-│   ├── grass.jpg
-│   ├── dirt.jpg
+│   ├── grass.png
+│   ├── dirt.png
 │   ├── benchy.obj       <-- 3D Models
 │   ├── bunny.obj
 │   ├── dragon.obj

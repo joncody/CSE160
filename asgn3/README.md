@@ -6,7 +6,7 @@ All requirements for Assignment 3 have been successfully implemented. This appli
 
 **Key Technical Features:**
 *   **First-Person Camera:** A fully functional camera system supporting 6 degrees of freedom (translation on X, Y, Z axes and rotation for Yaw/Pitch).
-*   **Texture Mapping:** Real-time texture switching between `grass.jpg` (floor) and `dirt.jpg` (walls), with support for solid colors (Sky and Scorpion).
+*   **Texture Mapping:** Real-time texture switching between `grass.png` (floor) and `dirt.png` (walls), with support for solid colors (Sky and Scorpion).
 *   **Raycast Interaction:** Minecraft-style block addition and deletion using a ray-marching algorithm to determine exactly which block the player is aiming at.
 *   **Static Buffer Optimization:** High performance is maintained using static GPU buffers for the `Cube` and `Pyramid` classes.
 
@@ -53,8 +53,8 @@ All requirements for Assignment 3 have been successfully implemented. This appli
 │   ├── Camera.js
 │   ├── Cube.js
 │   ├── Pyramid.js
-│   ├── grass.jpg
-│   └── dirt.jpg
+│   ├── grass.png
+│   └── dirt.png
 └── README.md
 ```
 
