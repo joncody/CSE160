@@ -97,6 +97,7 @@ function init() {
     const foundation = new THREE.Mesh(new THREE.BoxGeometry(34, 12, 34), stoneMat);
     foundation.position.y = 6;
     foundation.receiveShadow = true;
+    foundation.castShadow = true;
     templeGroup.add(foundation);
 
     for (let i = 0; i < 8; i++) {
