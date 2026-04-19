@@ -146,12 +146,12 @@ function initTextures() {
     img0.onload = function() {
         sendTextureToGPU(img0, u_Sampler0, 0);
     };
-    img0.src = "dirt.jpg";
+    img0.src = "dirt.png";
     let img1 = new Image();
     img1.onload = function() {
         sendTextureToGPU(img1, u_Sampler1, 1);
     };
-    img1.src = "grass.jpg";
+    img1.src = "grass.png";
 }
 
 function sendTextureToGPU(image, sampler, unit) {

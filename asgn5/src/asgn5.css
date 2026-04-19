@@ -1,0 +1,97 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #111;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+#info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 15px;
+    border-radius: 8px;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+#info h1 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    color: #00d4ff;
+}
+#info p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+.card-divider {
+    border: 0;
+    height: 1px;
+    background-color: #444;
+    margin: 15px 0 10px 0;
+}
+.home-link-container {
+    text-align: left;
+    pointer-events: auto;
+}
+.home-link {
+    color: #4fc3f7;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.2s ease-in-out;
+}
+.home-link:hover {
+    color: #e1f5fe;
+    text-decoration: underline;
+}
+#controls-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: #bbb;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+#stats {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: #4fc3f7;
+    font-family: monospace;
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+.wow-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #ff00cc, #3333ff);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 0 15px rgba(255, 0, 204, 0.4);
+    pointer-events: none;
+    z-index: 10;
+}
