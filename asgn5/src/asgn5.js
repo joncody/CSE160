@@ -12,16 +12,38 @@ let frameCount = 0;
 let fpsLastTime = 0;
 const dragonGuardians = [];
 
+// High-Detail Sakura Texture (Cluster of petals)
+function createSakuraTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = 64 + Math.cos(angle) * 22;
+        const y = 64 + Math.sin(angle) * 22;
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, 42);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.2, 'rgba(255, 185, 215, 0.9)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(x, y, 42, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    return new THREE.CanvasTexture(canvas);
+}
+const sakuraTex = createSakuraTexture();
+
 init();
 animate();
 
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.003);
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.0035);
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 80, 200);
+    camera.position.set(0, 110, 320);
 
-    // Camera needs to see both Layer 0 (Relics) and Layer 1 (Moon-lit Environment)
     camera.layers.enable(1);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -35,66 +57,46 @@ function init() {
     controls.enableDamping = true;
     statsDiv = document.getElementById('stats');
 
-    // Ambient/Hemisphere stay on Layer 0 to affect everything
     scene.add(new THREE.AmbientLight(0x444477, 0.8));
     scene.add(new THREE.HemisphereLight(0x4444ff, 0x112211, 0.6));
 
-    // Moon is moved to Layer 1: It will ignore the Sword and Tsuba
     const moon = new THREE.DirectionalLight(0xffffff, 2.5);
     moon.position.set(100, 150, 100);
     moon.castShadow = true;
     moon.layers.set(1);
     moon.shadow.bias = -0.0005;
-    moon.shadow.mapSize.set(4096, 4096);
-    moon.shadow.camera.left = -220;
-    moon.shadow.camera.right = 220;
-    moon.shadow.camera.top = 220;
-    moon.shadow.camera.bottom = -220;
+    moon.shadow.mapSize.set(2048, 2048);
+    moon.shadow.camera.left = -300;
+    moon.shadow.camera.right = 300;
+    moon.shadow.camera.top = 300;
+    moon.shadow.camera.bottom = -300;
     scene.add(moon);
 
-    // Rim light also moved to Layer 1
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    rimLight.position.set(0, 120, -150);
-    rimLight.layers.set(1);
-    scene.add(rimLight);
-
-    // Lantern light stays on Layer 0 to provide the one main relic shadow
-    lampLight = new THREE.PointLight(0xffaa44, 6000, 160);
-    lampLight.position.set(0, 38, 0);
-    lampLight.castShadow = true;
-    scene.add(lampLight);
-
-    // Orb light follows Tsuba - Shadow disabled to fix "double/rotating" glitch
-    orbLight = new THREE.PointLight(0xffaa44, 3500, 120);
-    orbLight.castShadow = false;
-    scene.add(orbLight);
+    const skyLoader = new THREE.CubeTextureLoader();
+    const spacePath = 'https://threejs.org/examples/textures/cube/MilkyWay/';
+    scene.background = skyLoader.load([
+        spacePath + 'dark-s_px.jpg', spacePath + 'dark-s_nx.jpg', spacePath + 'dark-s_py.jpg',
+        spacePath + 'dark-s_ny.jpg', spacePath + 'dark-s_pz.jpg', spacePath + 'dark-s_nz.jpg'
+    ]);
 
     const texLoader = new THREE.TextureLoader();
     const grassTex = texLoader.load('grass.png');
     const dirtTex = texLoader.load('dirt.png');
-    const skyLoader = new THREE.CubeTextureLoader();
-    const spacePath = 'https://threejs.org/examples/textures/cube/MilkyWay/';
 
-    scene.background = skyLoader.load([
-        spacePath+'dark-s_px.jpg', spacePath+'dark-s_nx.jpg', spacePath+'dark-s_py.jpg',
-        spacePath+'dark-s_ny.jpg', spacePath+'dark-s_pz.jpg', spacePath+'dark-s_nz.jpg'
-    ]);
-
-    const ground = new THREE.Mesh(
-        new THREE.CircleGeometry(250, 64),
-        new THREE.MeshStandardMaterial({ map: grassTex, color: 0x223322, roughness: 1.0 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    ground.layers.enable(1); // Ground needs to receive Moon shadows
-    scene.add(ground);
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 1.0 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.6 });
+    const jadeMat = new THREE.MeshPhysicalMaterial({
+        color: 0x004422,
+        emissive: 0x00ffcc,
+        emissiveIntensity: 0.08,
+        roughness: 0.2,
+        metalness: 0.2,
+        clearcoat: 0.5
+    });
 
     const templeGroup = new THREE.Group();
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x2d1b0f, roughness: 0.8 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.6 });
-
-    const foundation = new THREE.Mesh(new THREE.BoxGeometry(34, 12, 34), stoneMat);
+    const foundation = new THREE.Mesh(new THREE.BoxGeometry(46, 12, 34), stoneMat);
     foundation.position.y = 6;
     foundation.receiveShadow = true;
     foundation.castShadow = true;
@@ -102,23 +104,25 @@ function init() {
 
     for (let i = 0; i < 8; i++) {
         const stepDepth = 5;
-        const topY = 12 - (i * 1.5);
-        const step = new THREE.Mesh(new THREE.BoxGeometry(18.2, topY, stepDepth), new THREE.MeshStandardMaterial({ map: dirtTex }));
+        const topY = Math.max(0.4, 12 - (i * 1.7));
+        const step = new THREE.Mesh(new THREE.BoxGeometry(24, topY, stepDepth), stoneMat);
         step.position.set(0, topY / 2, 17 + (i * stepDepth) + (stepDepth / 2));
         step.receiveShadow = true;
         step.castShadow = true;
         templeGroup.add(step);
     }
+
     for (let i = 0; i < 4; i++) {
-        const p = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 30, 12), woodMat);
-        p.position.set(i < 2 ? 13 : -13, 26, i % 2 === 0 ? 13 : -13);
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 40, 12), woodMat);
+        p.position.set(i < 2 ? 19 : -19, 32, i % 2 === 0 ? 13 : -13);
         p.castShadow = true;
         templeGroup.add(p);
     }
+
     for (let i = 0; i < 3; i++) {
         const tierH = 6;
-        const tier = new THREE.Mesh(new THREE.BoxGeometry(42 - (i * 12), tierH, 42 - (i * 12)), roofMat);
-        tier.position.y = 41 + (tierH / 2) + (i * tierH);
+        const tier = new THREE.Mesh(new THREE.BoxGeometry(54 - (i * 12), tierH, 42 - (i * 12)), roofMat);
+        tier.position.y = 52 + (tierH / 2) + (i * tierH);
         tier.castShadow = true;
         templeGroup.add(tier);
     }
@@ -127,131 +131,197 @@ function init() {
         new THREE.SphereGeometry(2.4, 32, 32),
         new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xffaa44, emissiveIntensity: 2.5 })
     );
-    lanternSphere.position.set(0, 39, 0);
+    lanternSphere.position.set(0, 50, 0);
     templeGroup.add(lanternSphere);
 
-    const lCapH = 0.6;
-    const topCapGeo = new THREE.CylinderGeometry(2.1, 2.1, lCapH, 16);
-    const bottomCapGeo = new THREE.CylinderGeometry(1.05, 1.05, lCapH, 16);
-    const lanternTop = new THREE.Mesh(topCapGeo, woodMat);
-    lanternTop.position.set(0, 41.7, 0);
+    const lanternTop = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.1, 0.6, 16), woodMat);
+    lanternTop.position.set(0, 52.7, 0);
     templeGroup.add(lanternTop);
 
-    const lanternBottom = new THREE.Mesh(bottomCapGeo, woodMat);
-    lanternBottom.position.set(0, 36.3, 0);
+    const lanternBottom = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.6, 16), woodMat);
+    lanternBottom.position.set(0, 47.3, 0);
     templeGroup.add(lanternBottom);
 
-    // Ensure the entire shrine is visible to the Moon (Layer 1)
-    templeGroup.traverse(node => { if(node.isMesh) node.layers.enable(1); });
+    templeGroup.scale.set(1.4, 1.4, 1.4);
+    templeGroup.traverse((node) => {
+        if (node.isMesh) {
+            node.layers.enable(1);
+        }
+    });
     scene.add(templeGroup);
 
-    for (let i = 0; i < 22; i++) {
-        const segment = new THREE.Mesh(new THREE.CircleGeometry(10, 16), new THREE.MeshStandardMaterial({ map: dirtTex, roughness: 1 }));
-        const curve = Math.sin(i * 0.4) * 12;
-        segment.position.set(curve, 0.1 + (i * 0.001), 57 + (i * 9));
-        segment.rotation.x = -Math.PI / 2;
-        segment.receiveShadow = true;
-        segment.layers.enable(1);
-        scene.add(segment);
+    lampLight = new THREE.PointLight(0xffaa44, 8000, 200);
+    lampLight.position.set(0, 70, 0);
+    lampLight.castShadow = true;
+    lampLight.shadow.mapSize.set(2048, 2048);
+    lampLight.shadow.radius = 4;
+    lampLight.shadow.bias = -0.0001;
+    scene.add(lampLight);
+
+    orbLight = new THREE.PointLight(0xffaa44, 3500, 120);
+    orbLight.castShadow = false;
+    scene.add(orbLight);
+
+    const ground = new THREE.Mesh(
+        new THREE.CircleGeometry(250, 64),
+        new THREE.MeshStandardMaterial({ map: grassTex, color: 0x223322, roughness: 1.0 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    ground.layers.enable(1);
+    scene.add(ground);
+
+    for (let i = 0; i < 26; i++) {
+        let taper = 0;
+        if (i > 5) {
+            taper = Math.min(1.0, (i - 5) / 12);
+        }
+        const curve = Math.sin((i - 5) * 0.4) * 14 * taper;
+        const zPos = 57 + (i * 8);
+        const dist = Math.sqrt(curve * curve + zPos * zPos);
+        if (dist < 249) {
+            const segment = new THREE.Mesh(
+                new THREE.CircleGeometry(12, 16),
+                new THREE.MeshStandardMaterial({ map: dirtTex, roughness: 1 })
+            );
+            segment.position.set(curve, 0.1 + (i * 0.005), zPos);
+            segment.rotation.x = -Math.PI / 2;
+            segment.rotation.z = Math.random() * Math.PI * 2;
+            const sVar = 0.85 + Math.random() * 0.3;
+            segment.scale.set(sVar, sVar, 1);
+            segment.receiveShadow = true;
+            segment.layers.enable(1);
+            scene.add(segment);
+        }
     }
 
     const blossomMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        emissive: 0xffaaaa,
+        map: sakuraTex,
+        vertexColors: true,
+        emissive: 0xffaacc,
         emissiveIntensity: 0.1,
+        roughness: 0.9,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.95,
+        side: THREE.DoubleSide,
+        alphaTest: 0.1
     });
 
-    function createBonsai(x, z, s) {
-        const woodGeos = [];
-        const leafGeos = [];
-        const trunkHeight = 40;
-        const trunkGeo = new THREE.CylinderGeometry(0.5, 3.5, trunkHeight, 8);
-        trunkGeo.translate(0, trunkHeight / 2, 0);
-        woodGeos.push(trunkGeo);
-        for (let i = 0; i < 18; i++) {
-            const branchLen = 18 - (i * 0.6);
-            const branchGeo = new THREE.CylinderGeometry(0.1, 0.8, branchLen, 8);
-            branchGeo.rotateZ(Math.PI / 2);
-            branchGeo.translate(branchLen / 2, 10 + (i * 1.7), 0);
-            const branchYRot = (i * 1.2);
-            branchGeo.rotateY(branchYRot);
-            woodGeos.push(branchGeo);
-            const leafCount = i > 12 ? 8 : 4;
-            for (let j = 0; j < leafCount; j++) {
-                const leafSize = 3 + Math.random() * 2.5;
-                const leafGeo = new THREE.SphereGeometry(leafSize, 12, 12);
-                const lX = branchLen + Math.random() * 6 - 3;
-                const lY = Math.random() * 5 - 2.5;
-                const lZ = Math.random() * 5 - 2.5;
-                const localPos = new THREE.Vector3(lX, lY, lZ);
-                localPos.applyAxisAngle(new THREE.Vector3(0, 1, 0), branchYRot);
-                leafGeo.translate(localPos.x, localPos.y + 10 + (i * 1.7), localPos.z);
-                leafGeos.push(leafGeo);
+    function createForest() {
+        const allWoodGeos = [];
+        const allLeafGeos = [];
+
+        function generateTreeData(x, z, s, depthLimit) {
+            function spawnBranch(start, direction, length, thickness, depth) {
+                const newStart = direction.clone().multiplyScalar(length).add(start);
+                const branchGeo = new THREE.CylinderGeometry(thickness * 0.6, thickness, length, 4);
+                const axis = new THREE.Vector3(0, 1, 0);
+                const quaternion = new THREE.Quaternion().setFromUnitVectors(axis, direction.clone().normalize());
+                branchGeo.applyQuaternion(quaternion);
+                const midPoint = direction.clone().multiplyScalar(length / 2).add(start);
+                branchGeo.translate(midPoint.x, midPoint.y, midPoint.z);
+                branchGeo.scale(s, s, s);
+                branchGeo.translate(x, 0, z);
+                allWoodGeos.push(branchGeo);
+
+                if (depth <= 1) {
+                    const planes = [];
+                    const leafCount = (depth === 0) ? 14 : 7;
+                    const tuftCenter = newStart.clone();
+                    const clusterRadius = thickness * 4.0;
+                    for (let i = 0; i < leafCount; i++) {
+                        const lS = thickness * (depth === 0 ? 8.0 : 6.0) * (0.8 + Math.random() * 0.4);
+                        const p = new THREE.PlaneGeometry(lS, lS);
+                        const r = Math.pow(Math.random(), 0.5) * clusterRadius;
+                        const phi = Math.random() * Math.PI * 2;
+                        const theta = Math.random() * Math.PI;
+                        const ox = r * Math.sin(theta) * Math.cos(phi);
+                        const oy = r * Math.sin(theta) * Math.sin(phi);
+                        const oz = r * Math.cos(theta);
+                        p.rotateX(Math.random() * Math.PI);
+                        p.rotateY(Math.random() * Math.PI);
+                        p.translate(tuftCenter.x + ox, tuftCenter.y + oy, tuftCenter.z + oz);
+                        const colors = [];
+                        const baseColor = new THREE.Color();
+                        const tone = Math.random();
+                        if (tone > 0.6) {
+                            baseColor.setRGB(1, 0.95, 0.98);
+                        } else if (tone > 0.2) {
+                            baseColor.setRGB(1, 0.85, 0.92);
+                        } else {
+                            baseColor.setRGB(1, 0.6, 0.8);
+                        }
+                        for (let j = 0; j < 4; j++) {
+                            colors.push(baseColor.r, baseColor.g, baseColor.b);
+                        }
+                        p.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                        p.scale(s, s, s);
+                        p.translate(x, 0, z);
+                        planes.push(p);
+                    }
+                    allLeafGeos.push(BufferGeometryUtils.mergeGeometries(planes));
+                    if (depth <= 0) {
+                        return;
+                    }
+                }
+                const children = 3;
+                for (let i = 0; i < children; i++) {
+                    const newDir = direction.clone().lerp(new THREE.Vector3(0, 1, 0), 0.15).normalize();
+                    const radialAngle = (i / children) * Math.PI * 2;
+                    let tangent = new THREE.Vector3(0, 1, 0).cross(newDir);
+                    if (tangent.length() < 0.1) {
+                        tangent = new THREE.Vector3(1, 0, 0).cross(newDir);
+                    }
+                    tangent.normalize();
+                    newDir.applyAxisAngle(tangent, 0.6);
+                    newDir.applyAxisAngle(direction.clone().normalize(), radialAngle);
+                    spawnBranch(newStart, newDir, length * 0.76, thickness * 0.58, depth - 1);
+                }
             }
+            spawnBranch(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0), 14, 2.2, depthLimit);
         }
-        const crownGeo = new THREE.SphereGeometry(8, 12, 12);
-        crownGeo.translate(0, trunkHeight + 2, 0);
-        leafGeos.push(crownGeo);
-        const mergedWood = BufferGeometryUtils.mergeGeometries(woodGeos);
-        const mergedLeaves = BufferGeometryUtils.mergeGeometries(leafGeos);
-        const woodMesh = new THREE.Mesh(mergedWood, woodMat);
-        const leafMesh = new THREE.Mesh(mergedLeaves, blossomMat);
-        const treeGroup = new THREE.Group();
-        treeGroup.add(woodMesh, leafMesh);
-        treeGroup.position.set(x, 0, z);
-        treeGroup.scale.set(s, s, s);
-        treeGroup.rotation.y = Math.random() * Math.PI;
-        woodMesh.castShadow = true;
-        leafMesh.castShadow = true;
-        // Trees must exist on Layer 1 to be lit/shadowed by the Moon
-        treeGroup.traverse(n => { if(n.isMesh) n.layers.enable(1); });
-        scene.add(treeGroup);
+
+        const treeLocs = [
+            [130, 20, 4.5, 4],   // Right Hero
+            [-160, 30, 4.2, 4],  // Left Hero
+            [0, -150, 5.0, 4],   // Back Giant
+            [160, -140, 3.8, 3], // Back Right
+            [-180, -120, 3.5, 3],// Back Left
+            [70, -80, 4.0, 4],   // Mid Right
+            [-90, -70, 3.8, 4],  // Mid Left
+            [-190, 120, 3.5, 3], // Front Left
+            [180, 100, 3.2, 3]   // Front Right
+        ];
+        treeLocs.forEach((t) => {
+            generateTreeData(t[0], t[1], t[2], t[3]);
+        });
+
+        const forestWood = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(allWoodGeos), woodMat);
+        const forestLeaves = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(allLeafGeos), blossomMat);
+        forestWood.castShadow = true;
+        forestWood.receiveShadow = true;
+        forestLeaves.castShadow = true;
+        forestWood.layers.enable(1);
+        forestLeaves.layers.enable(1);
+        scene.add(forestWood, forestLeaves);
     }
-
-    createBonsai(70, -70, 1.1);
-    createBonsai(-80, -60, 0.9);
-    createBonsai(110, 20, 0.8);
-    createBonsai(-70, 80, 1.0);
-    createBonsai(40, -130, 1.2);
-    createBonsai(-50, -140, 0.7);
-    createBonsai(175, 70, 0.9);
-    createBonsai(-140, -120, 1.1);
-    createBonsai(180, -40, 0.85);
-    createBonsai(-150, 20, 0.95);
-    createBonsai(30, 175, 1.0);
-    createBonsai(-70, 160, 0.8);
-    createBonsai(-40, 220, 0.95);
-    createBonsai(130, 190, 0.9);
-    createBonsai(-210, -30, 1.0);
-    createBonsai(10, -220, 1.3);
-    createBonsai(-100, -210, 0.8);
-    createBonsai(135, -140, 1.1);
-    createBonsai(-150, 130, 0.9);
-    createBonsai(85, 110, 1.2);
-
-    const jadeMat = new THREE.MeshPhysicalMaterial({
-        color: 0x003311, emissive: 0x00ffcc, emissiveIntensity: 0.15,
-        roughness: 0.05, metalness: 0.3, clearcoat: 1.0
-    });
+    createForest();
 
     const objLoader = new OBJLoader();
     objLoader.load('dragon.obj', (obj) => {
         const left = obj.clone();
-        left.scale.set(7, 7, 7);
-        left.position.set(-45, 20, 12);
+        left.scale.set(15, 15, 15);
+        left.position.set(-85, 20, 15);
         left.rotation.y = Math.PI * 1.05;
         const right = obj.clone();
-        right.scale.set(-7, 7, 7);
-        right.position.set(45, 20, 12);
+        right.scale.set(-15, 15, 15);
+        right.position.set(85, 20, 15);
         right.rotation.y = -Math.PI * 1.05;
-        [left, right].forEach(d => {
-            d.traverse(c => {
+        [left, right].forEach((d) => {
+            d.traverse((c) => {
                 if (c.isMesh) {
                     c.material = jadeMat;
                     c.castShadow = true;
-                    c.layers.enable(1); // Enable Layer 1 for Moon shadows
                 }
             });
             scene.add(d);
@@ -262,7 +332,6 @@ function init() {
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('sword_of_hattori_hanzo_kill_bill.glb', (gltf) => {
         const sword = gltf.scene;
-        // FIX: Traverse to enable shadow casting for internal GLTF meshes
         sword.traverse((node) => {
             if (node.isMesh) {
                 node.castShadow = true;
@@ -270,7 +339,7 @@ function init() {
             }
         });
         sword.scale.set(24, 24, 24);
-        sword.position.set(0, 19, 0);
+        sword.position.set(0, 26, 0);
         sword.rotation.y = Math.PI / 2;
         scene.add(sword);
     });
@@ -320,7 +389,7 @@ function createLandedSnow() {
         const radius = Math.sqrt(Math.random()) * 250;
         const lx = Math.cos(angle) * radius;
         const lz = Math.sin(angle) * radius;
-        if (Math.abs(lx) > 18 || Math.abs(lz) > 18) {
+        if (Math.abs(lx) > 22 || Math.abs(lz) > 22) {
             vertices.push(lx, 0.2, lz);
         }
     }
@@ -345,35 +414,34 @@ function animate() {
     const time = currentTime * 0.0015;
     if (lampLight && lanternSphere) {
         const flicker = Math.random() * 0.15;
-        lampLight.intensity = 5500 + (Math.sin(currentTime * 0.01) * 400) + (flicker * 4000);
+        lampLight.intensity = 7000 + (Math.sin(currentTime * 0.01) * 500) + (flicker * 4000);
         lanternSphere.material.emissiveIntensity = 2.0 + (flicker * 3.0);
         lanternSphere.rotation.y += 0.01;
     }
     if (tsubaModel) {
-        const pathScale = 12;
         const den = 1 + Math.pow(Math.sin(time), 2);
-        const x = (pathScale * Math.cos(time)) / den;
-        const y = (pathScale * Math.sin(time) * Math.cos(time)) / den;
-        tsubaModel.position.set(x, 28 + y, 0);
+        const x = (12 * Math.cos(time)) / den;
+        const y = (12 * Math.sin(time) * Math.cos(time)) / den;
+        tsubaModel.position.set(x, 38 + y, 0);
         tsubaModel.rotation.x += 0.01;
         tsubaModel.rotation.y += 0.015;
         tsubaModel.rotation.z += 0.005;
         orbLight.position.copy(tsubaModel.position);
     }
     dragonGuardians.forEach((d, i) => {
-        d.position.y = 20 + Math.sin(time + i) * 0.5;
+        d.position.y = 36 + Math.sin(time + i) * 0.5;
     });
     if (window.cotton) {
         const pos = window.cotton.attributes.position.array;
         for (let i = 0; i < pos.length; i += 3) {
-            pos[i+1] -= 0.05;
-            const inRoof = Math.abs(pos[i]) < 21 && Math.abs(pos[i+2]) < 21;
-            if (pos[i+1] < 0 || (inRoof && pos[i+1] < 41)) {
+            pos[i + 1] -= 0.05;
+            const inRoof = Math.abs(pos[i]) < 35 && Math.abs(pos[i + 2]) < 35;
+            if (pos[i + 1] < 0 || (inRoof && pos[i + 1] < 75)) {
                 const angle = Math.random() * Math.PI * 2;
                 const radius = Math.random() * 250;
                 pos[i] = Math.cos(angle) * radius;
-                pos[i+1] = 400;
-                pos[i+2] = Math.sin(angle) * radius;
+                pos[i + 1] = 400;
+                pos[i + 2] = Math.sin(angle) * radius;
             }
         }
         window.cotton.attributes.position.needsUpdate = true;
