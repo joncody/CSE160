@@ -46,7 +46,9 @@ function init() {
 
     camera.layers.enable(1);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
@@ -83,9 +85,18 @@ function init() {
     const grassTex = texLoader.load('grass.png');
     const dirtTex = texLoader.load('dirt.png');
 
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 1.0 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.6 });
+    const stoneMat = new THREE.MeshStandardMaterial({
+        color: 0x333333
+    });
+    const woodMat = new THREE.MeshStandardMaterial({
+        color: 0x222222,
+        roughness: 1.0
+    });
+    const roofMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        roughness: 1.0,
+        metalness: 0.1
+    });
     const jadeMat = new THREE.MeshPhysicalMaterial({
         color: 0x004422,
         emissive: 0x00ffcc,
@@ -94,9 +105,17 @@ function init() {
         metalness: 0.2,
         clearcoat: 0.5
     });
+    const shojiMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xfff4e5,
+        emissiveIntensity: 0.02,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.95
+    });
 
     const templeGroup = new THREE.Group();
-    const foundation = new THREE.Mesh(new THREE.BoxGeometry(46, 12, 34), stoneMat);
+    const foundation = new THREE.Mesh(new THREE.BoxGeometry(56, 12, 34), stoneMat);
     foundation.position.y = 6;
     foundation.receiveShadow = true;
     foundation.castShadow = true;
@@ -105,7 +124,7 @@ function init() {
     for (let i = 0; i < 8; i++) {
         const stepDepth = 5;
         const topY = Math.max(0.4, 12 - (i * 1.7));
-        const step = new THREE.Mesh(new THREE.BoxGeometry(24, topY, stepDepth), stoneMat);
+        const step = new THREE.Mesh(new THREE.BoxGeometry(32, topY, stepDepth), stoneMat);
         step.position.set(0, topY / 2, 17 + (i * stepDepth) + (stepDepth / 2));
         step.receiveShadow = true;
         step.castShadow = true;
@@ -114,48 +133,98 @@ function init() {
 
     for (let i = 0; i < 4; i++) {
         const p = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 40, 12), woodMat);
-        p.position.set(i < 2 ? 19 : -19, 32, i % 2 === 0 ? 13 : -13);
+        p.position.set(i < 2 ? 24 : -24, 32, i % 2 === 0 ? 13 : -13);
         p.castShadow = true;
         templeGroup.add(p);
     }
 
+    const shojiGroup = new THREE.Group();
+    const paper = new THREE.Mesh(new THREE.PlaneGeometry(50, 40), shojiMat);
+    paper.receiveShadow = true;
+    shojiGroup.add(paper);
+
+    const gridParts = [];
+    const frameLeft = new THREE.BoxGeometry(1.5, 40, 0.8);
+    frameLeft.translate(-25, 0, 0.2);
+    const frameRight = new THREE.BoxGeometry(1.5, 40, 0.8);
+    frameRight.translate(25, 0, 0.2);
+    const frameTop = new THREE.BoxGeometry(50, 1.5, 0.8);
+    frameTop.translate(0, 20, 0.2);
+    const frameBot = new THREE.BoxGeometry(50, 1.5, 0.8);
+    frameBot.translate(0, -20, 0.2);
+    gridParts.push(frameLeft, frameRight, frameTop, frameBot);
+
+    for (let i = 1; i < 6; i++) {
+        const vBar = new THREE.BoxGeometry(0.4, 40, 0.6);
+        vBar.translate(-25 + (i * 8.33), 0, 0.1);
+        gridParts.push(vBar);
+    }
+    for (let i = 1; i < 6; i++) {
+        const hBar = new THREE.BoxGeometry(50, 0.4, 0.6);
+        hBar.translate(0, -20 + (i * 6.6), 0.1);
+        gridParts.push(hBar);
+    }
+    const mergedKumiko = BufferGeometryUtils.mergeGeometries(gridParts);
+    const kumikoMesh = new THREE.Mesh(mergedKumiko, woodMat);
+    kumikoMesh.receiveShadow = true;
+    shojiGroup.add(kumikoMesh);
+    shojiGroup.position.set(0, 32, -12.5);
+    templeGroup.add(shojiGroup);
+
     for (let i = 0; i < 3; i++) {
         const tierH = 6;
-        const tier = new THREE.Mesh(new THREE.BoxGeometry(54 - (i * 12), tierH, 42 - (i * 12)), roofMat);
+        const tier = new THREE.Mesh(new THREE.BoxGeometry(64 - (i * 12), tierH, 42 - (i * 12)), roofMat);
         tier.position.y = 52 + (tierH / 2) + (i * tierH);
         tier.castShadow = true;
+        tier.receiveShadow = true;
         templeGroup.add(tier);
     }
 
+    // LANTERN: Final composition (y: 49, z: 12)
     lanternSphere = new THREE.Mesh(
         new THREE.SphereGeometry(2.4, 32, 32),
-        new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xffaa44, emissiveIntensity: 2.5 })
+        new THREE.MeshStandardMaterial({
+            color: 0xffaa44,
+            emissive: 0xffaa44,
+            emissiveIntensity: 2.5
+        })
     );
-    lanternSphere.position.set(0, 50, 0);
+    lanternSphere.position.set(0, 49, 12);
     templeGroup.add(lanternSphere);
 
     const lanternTop = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.1, 0.6, 16), woodMat);
-    lanternTop.position.set(0, 52.7, 0);
+    lanternTop.position.set(0, 51.7, 12);
     templeGroup.add(lanternTop);
 
     const lanternBottom = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.6, 16), woodMat);
-    lanternBottom.position.set(0, 47.3, 0);
+    lanternBottom.position.set(0, 46.3, 12);
     templeGroup.add(lanternBottom);
 
-    templeGroup.scale.set(1.4, 1.4, 1.4);
+    templeGroup.scale.set(1.5, 1.5, 1.5);
+
+    // TRAVERSAL: Shadow management
     templeGroup.traverse((node) => {
         if (node.isMesh) {
             node.layers.enable(1);
+            if (node === lanternSphere || node === lanternBottom) {
+                node.castShadow = false;
+            } else {
+                node.castShadow = true;
+            }
+            node.receiveShadow = true;
         }
     });
     scene.add(templeGroup);
 
     lampLight = new THREE.PointLight(0xffaa44, 8000, 200);
-    lampLight.position.set(0, 70, 0);
+    lampLight.position.set(0, 49 * 1.5, 12 * 1.5); // Following lantern z: 12
     lampLight.castShadow = true;
     lampLight.shadow.mapSize.set(2048, 2048);
     lampLight.shadow.radius = 4;
-    lampLight.shadow.bias = -0.0001;
+    lampLight.shadow.bias = -0.001;
+    lampLight.shadow.normalBias = 0.02;
+    lampLight.shadow.camera.near = 0.1;
+    lampLight.shadow.camera.far = 300;
     scene.add(lampLight);
 
     orbLight = new THREE.PointLight(0xffaa44, 3500, 120);
@@ -164,7 +233,11 @@ function init() {
 
     const ground = new THREE.Mesh(
         new THREE.CircleGeometry(250, 64),
-        new THREE.MeshStandardMaterial({ map: grassTex, color: 0x223322, roughness: 1.0 })
+        new THREE.MeshStandardMaterial({
+            map: grassTex,
+            color: 0x223322,
+            roughness: 1.0
+        })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
@@ -177,12 +250,15 @@ function init() {
             taper = Math.min(1.0, (i - 5) / 12);
         }
         const curve = Math.sin((i - 5) * 0.4) * 14 * taper;
-        const zPos = 57 + (i * 8);
+        const zPos = 85 + (i * 8);
         const dist = Math.sqrt(curve * curve + zPos * zPos);
         if (dist < 249) {
             const segment = new THREE.Mesh(
                 new THREE.CircleGeometry(12, 16),
-                new THREE.MeshStandardMaterial({ map: dirtTex, roughness: 1 })
+                new THREE.MeshStandardMaterial({
+                    map: dirtTex,
+                    roughness: 1
+                })
             );
             segment.position.set(curve, 0.1 + (i * 0.005), zPos);
             segment.rotation.x = -Math.PI / 2;
@@ -282,15 +358,15 @@ function init() {
         }
 
         const treeLocs = [
-            [130, 20, 4.5, 4],   // Right Hero
-            [-160, 30, 4.2, 4],  // Left Hero
-            [0, -150, 5.0, 4],   // Back Giant
-            [160, -140, 3.8, 3], // Back Right
-            [-180, -120, 3.5, 3],// Back Left
-            [70, -80, 4.0, 4],   // Mid Right
-            [-90, -70, 3.8, 4],  // Mid Left
-            [-190, 120, 3.5, 3], // Front Left
-            [180, 100, 3.2, 3]   // Front Right
+            [160, 30, 4.5, 4],
+            [-180, 40, 4.2, 4],
+            [0, -150, 5.0, 4],
+            [160, -140, 3.8, 3],
+            [-180, -120, 3.5, 3],
+            [80, -90, 4.0, 4],
+            [-100, -80, 3.8, 4],
+            [-190, 120, 3.5, 3],
+            [180, 100, 3.2, 3]
         ];
         treeLocs.forEach((t) => {
             generateTreeData(t[0], t[1], t[2], t[3]);
@@ -339,7 +415,7 @@ function init() {
             }
         });
         sword.scale.set(24, 24, 24);
-        sword.position.set(0, 26, 0);
+        sword.position.set(0, 42, 0);
         sword.rotation.y = Math.PI / 2;
         scene.add(sword);
     });
@@ -374,7 +450,12 @@ function createCottonParticles() {
         vertices.push(Math.cos(angle) * radius, Math.random() * 400, Math.sin(angle) * radius);
     }
     geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const mat = new THREE.PointsMaterial({ size: 0.6, color: 0xffffff, transparent: true, opacity: 0.4 });
+    const mat = new THREE.PointsMaterial({
+        size: 0.6,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.4
+    });
     const points = new THREE.Points(geo, mat);
     points.layers.enable(1);
     scene.add(points);
@@ -394,7 +475,12 @@ function createLandedSnow() {
         }
     }
     landedSnowGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    landedSnowMat = new THREE.PointsMaterial({ size: 1.0, color: 0xffffff, transparent: true, opacity: 0.0 });
+    landedSnowMat = new THREE.PointsMaterial({
+        size: 1.0,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.0
+    });
     const points = new THREE.Points(landedSnowGeo, landedSnowMat);
     points.layers.enable(1);
     scene.add(points);
@@ -420,23 +506,23 @@ function animate() {
     }
     if (tsubaModel) {
         const den = 1 + Math.pow(Math.sin(time), 2);
-        const x = (12 * Math.cos(time)) / den;
-        const y = (12 * Math.sin(time) * Math.cos(time)) / den;
-        tsubaModel.position.set(x, 38 + y, 0);
+        const x = (20 * Math.cos(time)) / den;
+        const y = (18 * Math.sin(time) * Math.cos(time)) / den;
+        tsubaModel.position.set(x, 30 + y, 9);
         tsubaModel.rotation.x += 0.01;
         tsubaModel.rotation.y += 0.015;
         tsubaModel.rotation.z += 0.005;
         orbLight.position.copy(tsubaModel.position);
     }
     dragonGuardians.forEach((d, i) => {
-        d.position.y = 36 + Math.sin(time + i) * 0.5;
+        d.position.y = 38 + Math.sin(time + i) * 0.5;
     });
     if (window.cotton) {
         const pos = window.cotton.attributes.position.array;
         for (let i = 0; i < pos.length; i += 3) {
             pos[i + 1] -= 0.05;
-            const inRoof = Math.abs(pos[i]) < 35 && Math.abs(pos[i + 2]) < 35;
-            if (pos[i + 1] < 0 || (inRoof && pos[i + 1] < 75)) {
+            const inRoof = Math.abs(pos[i]) < 40 && Math.abs(pos[i + 2]) < 40;
+            if (pos[i + 1] < 0 || (inRoof && pos[i + 1] < 85)) {
                 const angle = Math.random() * Math.PI * 2;
                 const radius = Math.random() * 250;
                 pos[i] = Math.cos(angle) * radius;
