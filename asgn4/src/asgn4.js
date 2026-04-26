@@ -396,8 +396,8 @@ function renderScene() {
     let lY = parseFloat(document.getElementById("lightY").value);
     let lZ = parseFloat(document.getElementById("lightZ").value);
     if (g_lightAnimation) {
-        lX = 7 * Math.cos(g_seconds);
-        lZ = 7 * Math.sin(g_seconds);
+        lX += 7 * Math.cos(g_seconds);
+        lZ += 7 * Math.sin(g_seconds);
     }
     gl.uniform3f(u_lightPos, lX, lY, lZ);
     gl.uniform3f(u_cameraPos, g_camera.eye.elements[0], g_camera.eye.elements[1], g_camera.eye.elements[2]);
