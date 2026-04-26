@@ -14,21 +14,18 @@
         <!-- Bottom: Controls Area -->
         <div class="controls">
             <section>
-                <span class="label-title">Camera & View</span>
+                <span class="label-title">Arm & Pincer Joints</span>
                 <div class="control-row">
-                    <span>Zoom</span>
-                    <input type="range" id="zoomSlider" min="10" max="200" value="100" />
+                    <span>Arm Base</span>
+                    <input type="range" id="armBase" min="-45" max="45" value="0" />
                 </div>
                 <div class="control-row">
-                    <span>Rotation</span>
-                    <input type="range" id="angleSlider" min="0" max="360" value="35" />
+                    <span>Arm Elbow</span>
+                    <input type="range" id="armElbow" min="-30" max="30" value="0" />
                 </div>
-            </section>
-            <section>
-                <span class="label-title">Animation Controls</span>
-                <div class="button-row">
-                    <button id="animOn" class="active-btn">Animation ON</button>
-                    <button id="animOff">Animation OFF</button>
+                <div class="control-row">
+                    <span>Pincer Snap</span>
+                    <input type="range" id="pincer" min="-15" max="15" value="0" />
                 </div>
             </section>
             <section>
@@ -43,18 +40,21 @@
                 </div>
             </section>
             <section>
-                <span class="label-title">Arm & Pincer Joints</span>
+                <span class="label-title">Animation Controls</span>
+                <div class="button-row">
+                    <button id="animOn" class="active-btn">Animation ON</button>
+                    <button id="animOff">Animation OFF</button>
+                </div>
+            </section>
+            <section>
+                <span class="label-title">Camera & View</span>
                 <div class="control-row">
-                    <span>Arm Base</span>
-                    <input type="range" id="armBase" min="-45" max="45" value="0" />
+                    <span>Zoom</span>
+                    <input type="range" id="zoomSlider" min="10" max="200" value="100" />
                 </div>
                 <div class="control-row">
-                    <span>Arm Elbow</span>
-                    <input type="range" id="armElbow" min="-30" max="30" value="0" />
-                </div>
-                <div class="control-row">
-                    <span>Pincer Snap</span>
-                    <input type="range" id="pincer" min="-15" max="15" value="0" />
+                    <span>Rotation</span>
+                    <input type="range" id="angleSlider" min="0" max="360" value="35" />
                 </div>
             </section>
             <div class="tip">
