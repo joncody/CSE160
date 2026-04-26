@@ -320,7 +320,7 @@ function addActionsForHtmlUI() {
     canvas.onmousemove = (ev) => {
         if (ev.buttons === 1) {
             g_globalAngleX -= ev.movementX * 0.4;
-            g_globalAngleY += ev.movementY * 0.4;
+            g_globalAngleY -= ev.movementY * 0.4;
             // Update slider to match mouse rotation
             document.getElementById('angleSlider').value = g_globalAngleX;
         }

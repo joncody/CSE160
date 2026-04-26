@@ -226,7 +226,7 @@ function addActions() {
     };
     canvas.onmousemove = function(ev) {
         if (ev.buttons == 1) {
-            g_camera.panRight(ev.movementX * -0.2);
+            g_camera.panRight(ev.movementX * 0.2);
             g_camera.panUp(ev.movementY * -0.2);
         }
     };
